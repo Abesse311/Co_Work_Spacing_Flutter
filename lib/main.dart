@@ -13,15 +13,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-<<<<<<< HEAD
       theme: ThemeData(
         fontFamily: 'SF Pro Display',
         //scaffoldBackgroundColor: Colors.white,
       ),
       home: MyWidget(),
-=======
-      home: ,
->>>>>>> 4a98ea4d5ff07cdfba756673daa2b9134efd6fee
 
     );
   }
