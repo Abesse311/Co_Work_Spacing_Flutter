@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_projet_tutore/pages/singUp.dart';
+import 'package:http/http.dart' as http;
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   _RegisterScreenState createState() {
@@ -12,7 +15,46 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureText = true;
   bool _remindMe = false;
-  
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  Future<void> _registerUser() async {
+    if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _passwordController.text.isEmpty || _emailController.text.isEmpty ) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Veuillez remplir le champ Vide'),
+        ),
+      );
+      return;
+    }
+ 
+    final url = Uri.parse('http://localhost:5000/users');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "name": _nameController.text,
+        "email": _emailController.text,
+        "password": _passwordController.text,
+        "number": int.tryParse(_phoneController.text) ?? 0,
+      }),
+    );
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Inscription réussie !')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur: ${jsonDecode(response.body)['error']}'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,17 +66,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             // Image illustration
             Container(
               height: 250,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
-              ),
+              decoration: const BoxDecoration(color: Color(0xFFF5F5F5)),
               child: Center(
-                child: Image.asset(
-                  'img/sgine.jpg',
-                  fit: BoxFit.contain,
-                ),
+                child: Image.asset('img/sgine.jpg', fit: BoxFit.contain),
               ),
             ),
-            
+
             // Registration Form
             Padding(
               padding: const EdgeInsets.all(24.0),
@@ -53,13 +90,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 4),
                   const Text(
                     'Please register to log in.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Username field
                   Container(
                     decoration: BoxDecoration(
@@ -70,10 +104,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
-                          const Icon(Icons.person_outline, color: Colors.black54),
+                          const Icon(
+                            Icons.person_outline,
+                            color: Colors.black54,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: TextField(
+                              controller: _nameController,
                               decoration: const InputDecoration(
                                 hintText: 'User name',
                                 border: InputBorder.none,
@@ -86,7 +124,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
+                  // Email field
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.email, color: Colors.black54),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              controller: _emailController,
+                              decoration: const InputDecoration(
+                                hintText: 'Email',
+                                border: InputBorder.none,
+                                hintStyle: TextStyle(color: Colors.black54),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
                   // Password field
                   Container(
                     decoration: BoxDecoration(
@@ -101,6 +167,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: TextField(
+                              controller: _passwordController,
                               obscureText: _obscureText,
                               decoration: const InputDecoration(
                                 hintText: '•••••••••••••••',
@@ -111,7 +178,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           IconButton(
                             icon: Icon(
-                              _obscureText ? Icons.visibility_off : Icons.visibility,
+                              _obscureText
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: Colors.black54,
                             ),
                             onPressed: () {
@@ -125,7 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Phone number field
                   Container(
                     decoration: BoxDecoration(
@@ -140,6 +209,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: TextField(
+                              controller: _phoneController,
                               keyboardType: TextInputType.phone,
                               decoration: const InputDecoration(
                                 hintText: 'phone number',
@@ -153,17 +223,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Reminder toggle
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'Reminder me next time',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.black87),
                       ),
                       Switch(
                         value: _remindMe,
@@ -177,14 +244,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Sign up button
                   SizedBox(
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Implement registration logic
-                      },
+                      onPressed: _registerUser,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF3A5F4C),
                         shape: RoundedRectangleBorder(
@@ -192,30 +257,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       child: const Text(
-                        'Sing up',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
+                        'Sign up',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Login link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
                         'already have account? ',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.black87),
                       ),
                       GestureDetector(
                         onTap: () {
-                          // Navigate to login screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginScreen(),
+                            ),
+                          );
                         },
                         child: const Text(
                           'Log in',

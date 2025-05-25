@@ -1,8 +1,11 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/pages/register.dart';
+import 'package:flutter_projet_tutore/bottomNavBar/home_page.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -19,6 +22,46 @@ class _LoginScreenState extends State<LoginScreen> {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loginUser() async {
+    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _usernameController.text.isEmpty
+                ? 'Veuillez remplir le champ Email.'
+                : 'Veuillez remplir le champ Mot de passe.',
+          ),
+        ),
+      );
+      return;
+    }
+    final url = Uri.parse('http://localhost:5000/login');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "email": _usernameController.text,
+        "password": _passwordController.text,
+      }),
+    );
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Connexion réussie !')));
+      // Naviguer vers la page d'accueil
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur: ${jsonDecode(response.body)['error']}'),
+        ),
+      );
+    }
   }
 
   @override
@@ -77,10 +120,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                      hintText: 'User name',
+                      hintText: 'Email',
                       border: InputBorder.none,
                       prefixIcon: Icon(
-                        Icons.person_outline,
+                        Icons.email,
                         color: Colors.grey.shade700,
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -152,12 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Bouton Login
                 ElevatedButton(
-                  onPressed: () {
-                    // Implémentez la logique de connexion ici
-                    print('Username: ${_usernameController.text}');
-                    print('Password: ${_passwordController.text}');
-                    print('Remember me: $_rememberMe');
-                  },
+                  onPressed: _loginUser,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(
                       0xFF2E6845,
@@ -194,7 +232,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>  RegisterScreen()),
+                              builder: (context) => RegisterScreen(),
+                            ),
                           );
                         },
                         child: Text(
