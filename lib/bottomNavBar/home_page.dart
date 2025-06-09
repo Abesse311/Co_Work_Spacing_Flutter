@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_projet_tutore/pages/Locations.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -6,33 +7,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
-  
-
   // Room data list
   final List<Map<String, dynamic>> rooms = [
     {
       "title": "Salle de réunion",
       "subtitle": "oran sénia",
-      "image": "img/sallederunion.jpeg",
+      "image": "img/Salles/sallederunion.jpeg",
       "rating": "4.9",
     },
     {
       "title": "Salle de conférence",
       "subtitle": "oran usto",
-      "image": "img/conferance.jpeg",
+      "image": "img/Salles/conferance.jpeg",
       "rating": "4.9",
     },
     {
       "title": "Salle de formation",
       "subtitle": "oran",
-      "image": "img/formation.jpeg",
+      "image": "img/Salles/formation.jpeg",
       "rating": "4.9",
     },
     {
       "title": "Salle de réunion",
       "subtitle": "31",
-      "image": "img/runion_deux.jpeg",
+      "image": "img/Salles/runion_deux.jpeg",
       "rating": "4.9",
     },
   ];
@@ -41,7 +39,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 37, 77, 53),
+        backgroundColor: const Color.fromARGB(255, 46, 104, 69),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -52,9 +50,8 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: true,
       ),
-      
-   //================================================= BODY =================================================//
 
+      //================================================= BODY =================================================//
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -128,16 +125,35 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Column(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent.withOpacity(0.18),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.calendar_today_outlined,
-                      color: Colors.redAccent,
-                      size: 28,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  LocationsScreen(),
+                          transitionsBuilder: (
+                            context,
+                            animation,
+                            secondaryAnimation,
+                            child,
+                          ) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            );
+                          },
+                          transitionDuration: Duration(milliseconds: 500),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.withOpacity(0.18),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Image.asset("icons/choose.png",height: 20,width: 20,)
                     ),
                   ),
                   SizedBox(height: 12),
@@ -272,7 +288,6 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_projet_tutore/pages_parametres/AccountSettingsScreen.dart';
 
 // Settings Screen UI
 class SettingsScreen extends StatelessWidget {
@@ -8,7 +9,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 46, 104, 69),
         elevation: 0,
         title: const Text(
           'Settings',
@@ -53,23 +54,19 @@ class SettingsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             subtitle: const Text(
-              'Privacy, security, change email or number',
+              'change email or number',
               style: TextStyle(fontSize: 13, color: Colors.grey),
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AccountSettingsScreen(),
+                ),
+              );
+            },
           ),
-          ListTile(
-            leading: const Icon(Icons.chat_bubble_outline, color: Colors.grey),
-            title: const Text(
-              'Chats',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            subtitle: const Text(
-              'Theme, wallpapers, chat history',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-            onTap: () {},
-          ),
+
           ListTile(
             leading: const Icon(Icons.notifications_none, color: Colors.grey),
             title: const Text(
@@ -77,22 +74,44 @@ class SettingsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             subtitle: const Text(
-              'Message, group & call tones',
+              'Enable or disable app notifications', // Changed subtitle here
               style: TextStyle(fontSize: 13, color: Colors.grey),
             ),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.storage, color: Colors.grey),
-            title: const Text(
-              'Storage and data',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            subtitle: const Text(
-              'Network usage, auto-download',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-            onTap: () {},
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  bool isNotificationEnabled = true;
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      return AlertDialog(
+                        title: const Text('Notifications'),
+                        content: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Allow Notifications'),
+                            Switch(
+                              value: isNotificationEnabled,
+                              onChanged: (value) {
+                                setState(() {
+                                  isNotificationEnabled = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.help_outline, color: Colors.grey),
@@ -101,10 +120,53 @@ class SettingsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             subtitle: const Text(
-              'Help center, contact us, privacy policy',
+              'Help center, contact us',
               style: TextStyle(fontSize: 13, color: Colors.grey),
             ),
-            onTap: () {},
+            onTap: () {
+              showDialog(
+                context: context,
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('Contact Us'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Image.asset(
+                                'icons/logo.png',
+                                width: 24,
+                                height: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('WhatsApp: 0533000001'),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Image.asset(
+                                'icons/telegram.png',
+                                width: 24,
+                                height: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Telegram: 0733000001'),
+                            ],
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+              );
+            },
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

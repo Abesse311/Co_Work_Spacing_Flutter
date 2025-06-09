@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/bottomNavBar/balance.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/saves.dart';
+import 'package:flutter_projet_tutore/bottomNavBar/reservations.dart';
 import 'package:flutter_projet_tutore/bottomNavBar/settings.dart';
 import 'package:flutter_projet_tutore/bottomNavBar/home_page.dart';
 
@@ -12,17 +12,17 @@ class MyWidget extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<MyWidget> {
-  int selectedIndex = 0;
-  void navigi(int index) {
+  int selectedIndex = 1;
+  void navigation(int index) {
     setState(() {
       selectedIndex = index;
     });
   }
 
   List<Widget> pages = [
-    HomePage(),
     BalanceScreen(),
-    SavesScreen(),
+    HomePage(),
+    //SavesScreen(),
     SettingsScreen(),
   ];
   @override
@@ -48,7 +48,7 @@ class _MyWidgetState extends State<MyWidget> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             currentIndex: selectedIndex,
-            onTap: navigi,
+            onTap: navigation,
             type: BottomNavigationBarType.fixed,
             selectedItemColor: Color.fromARGB(255, 46, 104, 69),
             unselectedItemColor: const Color.fromARGB(255, 120, 120, 120),
@@ -56,17 +56,17 @@ class _MyWidgetState extends State<MyWidget> {
             showUnselectedLabels: false,
             items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_rounded, size: 32),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
                 icon: Icon(Icons.account_balance_wallet_rounded, size: 28),
                 label: 'Balance',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.bookmark_outline_rounded, size: 28),
-                label: 'Saves',
+                icon: Icon(Icons.home_rounded, size: 32),
+                label: 'Home',
               ),
+              // BottomNavigationBarItem(
+              //   icon: Icon(Icons.bookmark_outline_rounded, size: 28),
+              //   label: 'Saves',
+              // ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.account_box_rounded, size: 28),
                 label: 'Account',
