@@ -11,27 +11,27 @@ class _HomePageState extends State<HomePage> {
   final List<Map<String, dynamic>> rooms = [
     {
       "title": "Salle de réunion",
-      "subtitle": "oran sénia",
+      "subtitle": "sénia",
       "image": "img/Salles/sallederunion.jpeg",
-      "rating": "4.9",
+      "price": 500,
     },
     {
       "title": "Salle de conférence",
-      "subtitle": "oran usto",
+      "subtitle": "Maravale",
       "image": "img/Salles/conferance.jpeg",
-      "rating": "4.9",
+      "price": 500,
     },
     {
       "title": "Salle de formation",
-      "subtitle": "oran",
+      "subtitle": "Maravale",
       "image": "img/Salles/formation.jpeg",
-      "rating": "4.9",
+      "price": 500,
     },
     {
       "title": "Salle de réunion",
-      "subtitle": "31",
+      "subtitle": "bir_eljir",
       "image": "img/Salles/runion_deux.jpeg",
-      "rating": "4.9",
+      "price": 500,
     },
   ];
 
@@ -153,7 +153,11 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.redAccent.withOpacity(0.18),
                         shape: BoxShape.circle,
                       ),
-                      child: Image.asset("icons/choose.png",height: 20,width: 20,)
+                      child: Image.asset(
+                        "icons/choose.png",
+                        height: 20,
+                        width: 20,
+                      ),
                     ),
                   ),
                   SizedBox(height: 12),
@@ -227,7 +231,6 @@ class _HomePageState extends State<HomePage> {
                       ),
                       child: Row(
                         children: [
-                          // Room image
                           ClipRRect(
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(12),
@@ -241,7 +244,6 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           SizedBox(width: 12),
-                          // Room details
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,19 +263,14 @@ class _HomePageState extends State<HomePage> {
                                     fontSize: 14,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          // Rating
-                          Padding(
-                            padding: EdgeInsets.only(right: 12),
-                            child: Row(
-                              children: [
-                                Icon(Icons.star, color: Colors.amber, size: 16),
-                                SizedBox(width: 4),
+                                SizedBox(height: 4),
                                 Text(
-                                  room["rating"],
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  "${room["price"]} DZD/hour",
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 46, 104, 69),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ],
                             ),

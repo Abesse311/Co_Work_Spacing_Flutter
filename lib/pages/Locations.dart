@@ -1,26 +1,50 @@
+import 'dart:convert';
+import 'package:flutter_projet_tutore/pages/chambre.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
 class LocationsScreen extends StatefulWidget {
+  const LocationsScreen({super.key});
+
   @override
   State<LocationsScreen> createState() => _LocationsScreenState();
 }
 
 class _LocationsScreenState extends State<LocationsScreen> {
-  // Sample data for the rooms
-  final List<LocationData> locations = [
-    LocationData(
-      name: "Bir Eljir",
-      imageAsset: "img/Locations/bir_eljir.jpg", // Replace with your asset path
-    ),
-    LocationData(
-      name: "Es-senia",
-      imageAsset: "img/Locations/senai.jpg", // Replace with your asset path
-    ),
-    LocationData(
-      name: "Maravel",
-      imageAsset: "img/Locations/maravale.jpg", // Replace with your asset path
-    ),
-  ];
+  List<LocationData> locations = [];
+  bool isLoading = true;
+  @override
+  void initState() {
+    super.initState();
+    fetchLocations();
+  }
+
+  Future<void> fetchLocations() async {
+    final response = await http.get(
+      Uri.parse('https://6875-129-45-14-217.ngrok-free.app/locations'),
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        locations =
+            data
+                .map(
+                  (item) => LocationData(
+                    id: item['id'],
+                    name: item['name'],
+                    imageBase64: item['image_base64'],
+                  ),
+                )
+                .toList();
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,49 +52,47 @@ class _LocationsScreenState extends State<LocationsScreen> {
         title: Text("Locations"),
         backgroundColor: Color.fromARGB(255, 37, 77, 53),
       ),
-
       backgroundColor: Colors.grey[100],
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          // Changed from direct ListView.builder to Column
-          children: [
-            Expanded(
-              // Wrap ListView.builder with Expanded
-              child: ListView.builder(
-                itemCount: locations.length,
-                itemBuilder: (context, index) {
-                  return RoomCard(
-                    location: locations[index],
-                    onTap: () {
-                      // Here you can define a different action for each location
-                      // For now, just print the location name
-                      print('Clicked: ${locations[index].name}'); // TODO: ddjd
-                    },
-                  );
-                },
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              margin: const EdgeInsets.only(top: 8.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8.0),
-                border: Border.all(color: Colors.grey[300]!, width: 1.0),
-              ),
-              child: const Text(
-                "Note: Tous nos emplacements disposent d'une salle de repos et d'une salle à manger.",
-                style: TextStyle(
-                  fontSize: 14.0,
-                  color: Colors.grey,
-                  fontStyle: FontStyle.italic,
+        child:
+            isLoading
+                ? Center(child: CircularProgressIndicator())
+                : Column(
+                  // Changed from direct ListView.builder to Column
+                  children: [
+                    Expanded(
+                      // Wrap ListView.builder with Expanded
+                      child: ListView.builder(
+                        itemCount: locations.length,
+                        itemBuilder: (context, index) {
+                          return RoomCard(location: locations[index]);
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      margin: const EdgeInsets.only(top: 8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(
+                          color: Colors.grey[300]!,
+                          width: 1.0,
+                        ),
+                      ),
+                      child: const Text(
+                        "Note: Tous nos emplacements disposent d'une salle de repos et d'une salle à manger.",
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -78,14 +100,23 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
 class RoomCard extends StatelessWidget {
   final LocationData location;
-  final VoidCallback? onTap;
-  const RoomCard({Key? key, required this.location, this.onTap})
-    : super(key: key);
+  const RoomCard({super.key, required this.location});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => RoomsScreen(
+                  locationId: location.id,
+                  locationName: location.name,
+                ),
+          ),
+        );
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16.0),
         decoration: BoxDecoration(
@@ -110,11 +141,24 @@ class RoomCard extends StatelessWidget {
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(16.0),
                 ),
-                child: Image.asset(
-                  location.imageAsset,
-                  fit: BoxFit.fill, // Change from cover to contain
-                  // Removed errorBuilder
-                ),
+                child:
+                    location.imageBase64 != null
+                        ? Image.memory(
+                          base64Decode(location.imageBase64!),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 200,
+                        )
+                        : Container(
+                          color: Colors.grey[300],
+                          width: double.infinity,
+                          height: 200,
+                          child: Icon(
+                            Icons.image,
+                            size: 80,
+                            color: Colors.grey[500],
+                          ),
+                        ),
               ),
               // Bottom overlay with location info
               Positioned(
@@ -173,7 +217,9 @@ class RoomCard extends StatelessWidget {
 
 // Data model for location information
 class LocationData {
+  final int id;
   final String name;
-  final String imageAsset;
-  LocationData({required this.name, required this.imageAsset});
+  final String? imageBase64;
+
+  LocationData({required this.id, required this.name, this.imageBase64});
 }

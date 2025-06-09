@@ -1,51 +1,70 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'package:flutter_projet_tutore/bottomNavBar/balance.dart';
+import 'package:flutter_projet_tutore/bottomNavBar/home_page.dart';
+import 'package:flutter_projet_tutore/bottomNavBar/pricipale.dart';
+import 'package:flutter_projet_tutore/bottomNavBar/settings.dart';
 import 'package:flutter_projet_tutore/pages/sginUp.dart';
+// import 'package:flutter_projet_tutore/locations.dart';
+// import 'package:flutter_projet_tutore/settings.dart';
+// import 'package:flutter_projet_tutore/solde.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  _RegisterScreenState createState() {
-    return _RegisterScreenState();
-  }
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   bool _obscureText = true;
-  bool _remindMe = false;
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
-  Future<void> _registerUser() async {
-    if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _passwordController.text.isEmpty || _emailController.text.isEmpty ) {
+  Future<void> _loginUser() async {
+    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Veuillez remplir le champ Vide'),
+          content: Text(
+            _usernameController.text.isEmpty
+                ? 'Veuillez remplir le champ Email.'
+                : 'Veuillez remplir le champ Mot de passe.',
+          ),
         ),
       );
       return;
     }
- 
-    final url = Uri.parse('http://localhost:5000/users');
+    final url = Uri.parse('https://6875-129-45-14-217.ngrok-free.app/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        "name": _nameController.text,
-        "email": _emailController.text,
+        "email": _usernameController.text,
         "password": _passwordController.text,
-        "number": int.tryParse(_phoneController.text) ?? 0,
       }),
     );
-    if (response.statusCode == 201) {
+    print(response.statusCode);
+    if (response.statusCode == 200) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Inscription réussie !')));
+      ).showSnackBar(SnackBar(content: Text('Connexion réussie !')));
+      // Naviguer vers la page d'accueil
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MyWidget()),
+        (Route<dynamic> route) => false,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_email', _usernameController.text);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -59,243 +78,167 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Image illustration
-            Container(
-              height: 250,
-              decoration: const BoxDecoration(color: Color(0xFFF5F5F5)),
-              child: Center(
-                child: Image.asset('img/sgine.jpg', fit: BoxFit.contain),
-              ),
-            ),
-
-            // Registration Form
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  const Text(
-                    'Register',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Image d'ambiance avec personne assise
+                Container(
+                  height: 220,
+                  decoration: BoxDecoration(
+                    color: const Color(
+                      0xFFF5F5DC,
+                    ), // Couleur beige clair pour le fond
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Please register to log in.',
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                  child: Center(
+                    child: Image.asset('img/sgine.jpg', fit: BoxFit.contain),
                   ),
-                  const SizedBox(height: 32),
+                ),
 
-                  // Username field
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.person_outline,
-                            color: Colors.black54,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _nameController,
-                              decoration: const InputDecoration(
-                                hintText: 'User name',
-                                border: InputBorder.none,
-                                hintStyle: TextStyle(color: Colors.black54),
-                              ),
-                            ),
-                          ),
-                        ],
+                const SizedBox(height: 24),
+
+                // Titre Login
+                const Text(
+                  'Login',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Sous-titre
+                const Text(
+                  'Please log in to continue.',
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Champ Username
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextField(
+                    controller: _usernameController,
+                    decoration: InputDecoration(
+                      hintText: 'Email',
+                      border: InputBorder.none,
+                      prefixIcon: Icon(
+                        Icons.email,
+                        color: Colors.grey.shade700,
                       ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                ),
 
-                  // Email field
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.email, color: Colors.black54),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _emailController,
-                              decoration: const InputDecoration(
-                                hintText: 'Email',
-                                border: InputBorder.none,
-                                hintStyle: TextStyle(color: Colors.black54),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                const SizedBox(height: 16),
+
+                // Champ Mot de passe
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 16),
-
-                  // Password field
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.lock_outline, color: Colors.black54),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _passwordController,
-                              obscureText: _obscureText,
-                              decoration: const InputDecoration(
-                                hintText: '•••••••••••••••',
-                                border: InputBorder.none,
-                                hintStyle: TextStyle(color: Colors.black54),
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              _obscureText
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: Colors.black54,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureText = !_obscureText;
-                              });
-                            },
-                          ),
-                        ],
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: _obscureText,
+                    decoration: InputDecoration(
+                      hintText: '••••••••••••••••',
+                      border: InputBorder.none,
+                      prefixIcon: Icon(
+                        Icons.lock_outline,
+                        color: Colors.grey.shade700,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Phone number field
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.phone, color: Colors.black54),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              decoration: const InputDecoration(
-                                hintText: 'phone number',
-                                border: InputBorder.none,
-                                hintStyle: TextStyle(color: Colors.black54),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Reminder toggle
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Reminder me next time',
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                      Switch(
-                        value: _remindMe,
-                        onChanged: (value) {
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey.shade700,
+                        ),
+                        onPressed: () {
                           setState(() {
-                            _remindMe = value;
+                            _obscureText = !_obscureText;
                           });
                         },
-                        activeColor: const Color(0xFF3A5F4C),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Sign up button
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _registerUser,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3A5F4C),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        'Sign up',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                ),
 
-                  // Login link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'already have account? ',
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                      GestureDetector(
+                const SizedBox(height: 24),
+
+                const SizedBox(height: 32),
+
+                // Bouton Login
+                ElevatedButton(
+                  onPressed: _loginUser,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(
+                      0xFF2E6845,
+                    ), // Couleur verte foncée
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Log in',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Lien d'inscription
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'already have account? ',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        // Naviguer vers l'écran d'inscription
+                        print('Naviguer vers l\'écran d\'inscription');
+                      },
+                      child: GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => LoginScreen(),
+                              builder: (context) => RegisterScreen(),
                             ),
                           );
                         },
-                        child: const Text(
-                          'Log in',
+                        child: Text(
+                          'Sing up',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Color(0xFF3A5F4C),
                             fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E6845), // Couleur verte foncée
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
