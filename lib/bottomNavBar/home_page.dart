@@ -178,7 +178,7 @@ class _HomePageState extends State<HomePage> {
 
             // Recommended section
             Text(
-              'Recommended for You',
+              'Suggested for you',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
@@ -199,17 +199,14 @@ class _HomePageState extends State<HomePage> {
                           SnackBar(content: Text('Tapped Salle de réunion')),
                         );
                       } else if (index == 1) {
-                        // Action for second room
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Tapped Salle de conférence')),
                         );
                       } else if (index == 2) {
-                        // Action for third room
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Tapped Salle de formation')),
                         );
                       } else if (index == 3) {
-                        // Action for fourth room
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Tapped Salle de réunion 31')),
                         );
