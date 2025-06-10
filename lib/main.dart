@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/home_page.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/pricipale.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/balance.dart';
-import 'package:flutter_projet_tutore/pages/Locations.dart';
 import 'package:flutter_projet_tutore/pages/sginUp.dart';
+//import 'package:flutter_projet_tutore/pages/sgin.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +17,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'SF Pro Display',
         //scaffoldBackgroundColor: Colors.white,
       ),
-      home: MyWidget(),
+      home: RegisterScreen(),
 
     );
   }
