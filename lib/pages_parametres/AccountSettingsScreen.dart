@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountSettingsScreen extends StatefulWidget {
   const AccountSettingsScreen({Key? key}) : super(key: key);
@@ -10,12 +11,11 @@ class AccountSettingsScreen extends StatefulWidget {
 }
 
 class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-
   bool _loading = false;
+  int? userId; ////////////////////////
 
   @override
   void initState() {
@@ -24,8 +24,20 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   }
 
   Future<void> _fetchProfile() async {
-    // Replace with your actual API endpoint and add authentication if needed
-    final url = Uri.parse('http://your-flask-backend/api/profile');
+    setState(() => _loading = true);
+    final prefs = await SharedPreferences.getInstance();
+    userId = prefs.getInt('user_id');
+    if (userId == null) {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Utilisateur non connecté')));
+      return;
+    }
+    final url = Uri.parse(
+      'https://cb9d-154-255-31-153.ngrok-free.app/users/$userId',
+    );
+
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -33,42 +45,59 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         setState(() {
           _nameController.text = data['name'] ?? '';
           _emailController.text = data['email'] ?? '';
-          _phoneController.text = data['phone'] ?? '';
+          _phoneController.text = data['number']?.toString() ?? '';
         });
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to load profile')));
       }
     } catch (e) {
-      // Handle error
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Error loading profile')));
+    } finally {
+      setState(() => _loading = false);
     }
   }
 
-  Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _updateProfileField(String field, String value) async {
     setState(() => _loading = true);
-
-    final url = Uri.parse('http://your-flask-backend/api/profile');
+    if (userId == null) {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Utilisateur non connecté')));
+      return;
+    }
+    final url = Uri.parse(
+      'https://cb9d-154-255-31-153.ngrok-free.app/users/$userId',
+    );
     try {
       final response = await http.put(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'name': _nameController.text,
-          'email': _emailController.text,
-          'phone': _phoneController.text,
-        }),
+        body: json.encode({field: value}),
       );
       if (response.statusCode == 200) {
+        setState(() {
+          if (field == 'name') _nameController.text = value;
+          if (field == 'email') _emailController.text = value;
+
+          if (field == 'number') _phoneController.text = value;
+        });
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Profile updated!')));
+        ).showSnackBar(SnackBar(content: Text('$field mis à jour !')));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update profile')),
+          SnackBar(content: Text('Erreur lors de la mise à jour de $field')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Error updating profile')));
+      ).showSnackBar(SnackBar(content: Text('Erreur réseau')));
     } finally {
       setState(() => _loading = false);
     }
@@ -77,54 +106,167 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Account Settings')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-                validator:
-                    (value) =>
-                        value == null || value.isEmpty
-                            ? 'Enter your name'
-                            : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator:
-                    (value) =>
-                        value == null || value.isEmpty
-                            ? 'Enter your email'
-                            : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone'),
-                validator:
-                    (value) =>
-                        value == null || value.isEmpty
-                            ? 'Enter your phone'
-                            : null,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _loading ? null : _saveProfile,
-                child:
-                    _loading
-                        ? const CircularProgressIndicator()
-                        : const Text('Save'),
-              ),
-            ],
-          ),
-        ),
+      appBar: AppBar(
+        title: const Text('Account Settings'),
+        elevation: 0,
+        backgroundColor: Color.fromARGB(255, 46, 104, 69),
       ),
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Color.fromARGB(255, 46, 104, 69),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Personal Information',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall?.copyWith(
+                          color: Color.fromARGB(255, 46, 104, 69),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  ListTile(
+                    leading: const Icon(Icons.person_outline),
+                    title: const Text('Name'),
+                    subtitle: Text(_nameController.text),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        final controller = TextEditingController(
+                          text: _nameController.text,
+                        );
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                title: const Text('Edit Name'),
+                                content: TextField(
+                                  controller: controller,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Name',
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      await _updateProfileField(
+                                        'name',
+                                        controller.text,
+                                      );
+                                    },
+                                    child: const Text('Save'),
+                                  ),
+                                ],
+                              ),
+                        );
+                      },
+                    ),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.email_outlined),
+                    title: const Text('Email'),
+                    subtitle: Text(_emailController.text),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        final controller = TextEditingController(
+                          text: _emailController.text,
+                        );
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                title: const Text('Edit Email'),
+                                content: TextField(
+                                  controller: controller,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Email',
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      await _updateProfileField(
+                                        'email',
+                                        controller.text,
+                                      );
+                                    },
+                                    child: const Text('Save'),
+                                  ),
+                                ],
+                              ),
+                        );
+                      },
+                    ),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.phone_outlined),
+                    title: const Text('Phone'),
+                    subtitle: Text(_phoneController.text),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        final controller = TextEditingController(
+                          text: _phoneController.text,
+                        );
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                title: const Text('Edit Phone'),
+                                content: TextField(
+                                  controller: controller,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Phone',
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      await _updateProfileField(
+                                        'number',
+                                        controller.text,
+                                      );
+                                    },
+                                    child: const Text('Save'),
+                                  ),
+                                ],
+                              ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
     );
   }
 }
