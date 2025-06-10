@@ -1,15 +1,9 @@
 import 'dart:convert';
-import 'package:flutter_projet_tutore/bottomNavBar/balance.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/home_page.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/pricipale.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/settings.dart';
-import 'package:flutter_projet_tutore/pages/sginUp.dart';
-// import 'package:flutter_projet_tutore/locations.dart';
-// import 'package:flutter_projet_tutore/settings.dart';
-// import 'package:flutter_projet_tutore/solde.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:flutter_projet_tutore/bottomNavBar/pricipale.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_projet_tutore/pages/sginUp.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-    final url = Uri.parse('https://6875-129-45-14-217.ngrok-free.app/login');
+    final url = Uri.parse('https://cb9d-154-255-31-153.ngrok-free.app/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -52,12 +46,10 @@ class _LoginScreenState extends State<LoginScreen> {
         "password": _passwordController.text,
       }),
     );
-    print(response.statusCode);
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Connexion réussie !')));
-      // Naviguer vers la page d'accueil
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => MyWidget()),
@@ -65,6 +57,10 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_email', _usernameController.text);
+      final responseData = jsonDecode(response.body);
+      if (responseData['id'] != null) {
+        await prefs.setInt('user_id', responseData['id']);
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -85,23 +81,17 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Image d'ambiance avec personne assise
                 Container(
                   height: 220,
                   decoration: BoxDecoration(
-                    color: const Color(
-                      0xFFF5F5DC,
-                    ), // Couleur beige clair pour le fond
+                    color: const Color(0xFFF5F5DC),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
                     child: Image.asset('img/sgine.jpg', fit: BoxFit.contain),
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                // Titre Login
                 const Text(
                   'Login',
                   style: TextStyle(
@@ -110,18 +100,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.black,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
-                // Sous-titre
                 const Text(
                   'Please log in to continue.',
                   style: TextStyle(fontSize: 16, color: Colors.black54),
                 ),
-
                 const SizedBox(height: 32),
-
-                // Champ Username
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
@@ -140,10 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // Champ Mot de passe
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
@@ -176,18 +157,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 24),
-
                 const SizedBox(height: 32),
-
-                // Bouton Login
                 ElevatedButton(
                   onPressed: _loginUser,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(
-                      0xFF2E6845,
-                    ), // Couleur verte foncée
+                    backgroundColor: const Color(0xFF2E6845),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -199,10 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                // Lien d'inscription
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -212,25 +183,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // Naviguer vers l'écran d'inscription
-                        print('Naviguer vers l\'écran d\'inscription');
-                      },
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RegisterScreen(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Sing up',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2E6845), // Couleur verte foncée
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RegisterScreen(),
                           ),
+                        );
+                      },
+                      child: Text(
+                        'Sing up',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2E6845),
                         ),
                       ),
                     ),
