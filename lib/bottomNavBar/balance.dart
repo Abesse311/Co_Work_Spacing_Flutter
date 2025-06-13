@@ -22,14 +22,12 @@ class _BalanceScreenState extends State<BalanceScreen> {
 
   Future<void> fetchUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    String? userEmail = prefs.getString('user_email');
-    if (userEmail == null) return; // ou affiche une erreur
+    int? userId = prefs.getInt('user_id');
+    if (userId == null) return; // ou affiche une erreur
 
     try {
       final response = await http.get(
-        Uri.parse(
-          'https://6875-129-45-14-217.ngrok-free.app/users/email/$userEmail',
-        ),
+        Uri.parse('https://1c84-129-45-8-202.ngrok-free.app/users/$userId'),
       );
 
       if (response.statusCode == 200) {

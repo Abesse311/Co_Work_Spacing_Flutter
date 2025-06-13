@@ -22,7 +22,7 @@ class _MyWidgetState extends State<MyWidget> {
   List<Widget> pages = [
     BalanceScreen(),
     HomePage(),
-    //SavesScreen(),
+    ReservationsScreen(),
     SettingsScreen(),
   ];
   @override
@@ -56,17 +56,20 @@ class _MyWidgetState extends State<MyWidget> {
             showUnselectedLabels: false,
             items: [
               BottomNavigationBarItem(
+                icon: Icon(Icons.home_rounded, size: 32),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
                 icon: Icon(Icons.account_balance_wallet_rounded, size: 28),
                 label: 'Balance',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_rounded, size: 32),
-                label: 'Home',
+                icon: Icon(
+                  Icons.event_note,
+                  size: 28,
+                ), // Changed icon for Bookings
+                label: 'Bookings',
               ),
-              // BottomNavigationBarItem(
-              //   icon: Icon(Icons.bookmark_outline_rounded, size: 28),
-              //   label: 'Saves',
-              // ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.account_box_rounded, size: 28),
                 label: 'Account',

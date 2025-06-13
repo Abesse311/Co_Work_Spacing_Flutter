@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter_projet_tutore/pages/chambre.dart';
+import 'package:flutter_projet_tutore/pages/Rooms.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
@@ -21,7 +21,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   Future<void> fetchLocations() async {
     final response = await http.get(
-      Uri.parse('https://6875-129-45-14-217.ngrok-free.app/locations'),
+      Uri.parse('https://1c84-129-45-8-202.ngrok-free.app/locations'),
     );
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -30,7 +30,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
             data
                 .map(
                   (item) => LocationData(
-                    id: item['id'],
+                    id: item['id'], // Assuming the API provides an 'id' field ////////////////////////////
                     name: item['name'],
                     imageBase64: item['image_base64'],
                   ),
@@ -39,6 +39,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
         isLoading = false;
       });
     } else {
+      // Handle error
       setState(() {
         isLoading = false;
       });
@@ -101,7 +102,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
 class RoomCard extends StatelessWidget {
   final LocationData location;
   const RoomCard({super.key, required this.location});
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -145,9 +145,9 @@ class RoomCard extends StatelessWidget {
                     location.imageBase64 != null
                         ? Image.memory(
                           base64Decode(location.imageBase64!),
-                          fit: BoxFit.cover,
+                          fit: BoxFit.fill,
                           width: double.infinity,
-                          height: 200,
+                          //height: 50,
                         )
                         : Container(
                           color: Colors.grey[300],
@@ -220,6 +220,5 @@ class LocationData {
   final int id;
   final String name;
   final String? imageBase64;
-
   LocationData({required this.id, required this.name, this.imageBase64});
 }

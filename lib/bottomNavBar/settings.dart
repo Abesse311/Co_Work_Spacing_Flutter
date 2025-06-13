@@ -25,8 +25,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> fetchUserName() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      String? userEmail = prefs.getString('user_email');
-      if (userEmail == null) {
+      int? userId = prefs.getInt('user_id');
+      if (userId == null) {
         setState(() {
           userName = 'User Name';
         });
@@ -34,9 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
 
       final response = await http.get(
-        Uri.parse(
-          'https://6875-129-45-14-217.ngrok-free.app/users/email/$userEmail',
-        ),
+        Uri.parse('https://1c84-129-45-8-202.ngrok-free.app/users/$userId'),
       );
 
       if (response.statusCode == 200) {
@@ -76,7 +74,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Color.fromARGB(255, 46, 104, 69),
         elevation: 0,
         title: const Text(
-          'Account ', 
+          'Account ',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),

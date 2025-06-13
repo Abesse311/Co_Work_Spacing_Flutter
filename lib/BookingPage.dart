@@ -32,7 +32,7 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
 
     final response = await http.get(
       Uri.parse(
-        'https://cb9d-154-255-31-153.ngrok-free.app/rooms/${widget.room['id']}/slots?start=$start&end=$end',
+        'https://1c84-129-45-8-202.ngrok-free.app/rooms/${widget.room['id']}/slots?start=$start&end=$end',
       ),
     );
 
@@ -80,7 +80,7 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
     }
 
     final response = await http.post(
-      Uri.parse('https://cb9d-154-255-31-153.ngrok-free.app/bookings'),
+      Uri.parse('https://1c84-129-45-8-202.ngrok-free.app/bookings'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         "user_id": userId,
@@ -110,7 +110,7 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Réservation - ${widget.room['name']}')),
+      appBar: AppBar(title: Text('Réservation - ${widget.room['name']}'),backgroundColor: Color.fromARGB(255, 46, 104, 69),),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child:
@@ -187,13 +187,7 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
                     // Calcule le nombre de slots et le montant total
                     int startHour = int.parse(selectedStart!.split(':')[0]);
                     int endHour = int.parse(selectedEnd!.split(':')[0]);
-                    int slotCount = (endHour - startHour).abs();
-                    if (endHour <= startHour) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("L'heure de fin doit être après l'heure de début.")),
-                      );
-                      return;
-                    }
+                    int slotCount = endHour - startHour;
                     double slotPrice =
                         widget.room['slot_price'] is int
                             ? (widget.room['slot_price'] as int).toDouble()

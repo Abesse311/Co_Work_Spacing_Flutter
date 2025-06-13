@@ -1,51 +1,72 @@
-// historiques de reservations 
+// historiques de reservations
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/settings.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
-class SavesScreen extends StatefulWidget {
-  const SavesScreen({Key? key}) : super(key: key);
+class ReservationsScreen extends StatefulWidget {
+  const ReservationsScreen({Key? key}) : super(key: key);
 
   @override
-  State<SavesScreen> createState() => _SavesScreenState();
+  State<ReservationsScreen> createState() => _ReservationsScreenState();
 }
 
-class _SavesScreenState extends State<SavesScreen> {
-  // List of data for each item
-  final List<Map<String, dynamic>> savedItems = [
-    {
-      "title": "Salle de réunion",
-      "subtitle": "Oran Sénia",
-      "image": "img/sallederunion.jpeg",
-      "rating": "4.9",
-    },
-    {
-      "title": "salle de formaion",
-      "subtitle": "Alger Hydra",
-      "image": "img/runion_deux.jpeg",
-      "rating": "4.7",
-    },
-    {
-      "title": "salle to conférance",
-      "subtitle": "Constantine Centre",
-      "image": "img/conferance.jpeg",
-      "rating": "4.8",
-    },
-    {
-      "title": "Salle de formation",
-      "subtitle": "Tlemcen Mansourah",
-      "image": "img/formation.jpeg",
-      "rating": "4.6",
-    },
-  ];
+class _ReservationsScreenState extends State<ReservationsScreen> {
+  List<Map<String, dynamic>> reservations = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchReservations();
+  }
+
+  Future<void> fetchReservations() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = 1;
+    if (userId == null) return;
+
+    final url = Uri.parse('http://localhost:5000/reservations/user/$userId');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          reservations =
+              data
+                  .map(
+                    (item) => {
+                      "title": item["room_name"] ?? "Unknown Room",
+                      "subtitle":
+                          "${item["location"] ?? ""} | ${item["date"] ?? ""} ${item["start_time"] ?? ""} (${item["slot_count"]}h)",
+                      "image": item["room_image"] ?? "img/default_room.jpg",
+                      "price": item["price"] ?? "",
+                      "status": item["status"] ?? "Confirmed",
+                    },
+                  )
+                  .toList();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 46, 104, 69),
+        backgroundColor: const Color.fromARGB(255, 46, 104, 69),
         elevation: 0,
         title: const Text(
-          'saves',
+          'My Reservations',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -54,64 +75,17 @@ class _SavesScreenState extends State<SavesScreen> {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: "Search Now",
-                        prefixIcon: Icon(Icons.search),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.filter_list),
-                    onPressed: () {
-                      // Filter logic removed
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: savedItems.length,
-              itemBuilder: (context, index) {
-                final item = savedItems[index];
-                return GestureDetector(
-                  onTap: () {
-                    // Example: Navigate to SettingsScreen for the second item
-                    if (index == 1) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SettingsScreen(),
-                        ),
-                      );
-                    }
-                  },
-                  child: Container(
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : reservations.isEmpty
+              ? const Center(child: Text("No reservations found."))
+              : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: reservations.length,
+                itemBuilder: (context, index) {
+                  final item = reservations[index];
+                  return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -121,27 +95,32 @@ class _SavesScreenState extends State<SavesScreen> {
                           color: Colors.grey.withOpacity(0.1),
                           spreadRadius: 1,
                           blurRadius: 2,
-                          offset: Offset(0, 1),
+                          offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: Row(
                       children: [
-                        // Room image
                         ClipRRect(
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(12),
                             bottomLeft: Radius.circular(12),
                           ),
-                          child: Image.asset(
+                          child: Image.network(
                             item["image"],
                             width: 120,
                             height: 70,
                             fit: BoxFit.cover,
+                            errorBuilder:
+                                (context, error, stackTrace) => Image.asset(
+                                  "img/default_room.jpg",
+                                  width: 120,
+                                  height: 70,
+                                  fit: BoxFit.cover,
+                                ),
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Room details
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,24 +140,24 @@ class _SavesScreenState extends State<SavesScreen> {
                                   fontSize: 14,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        // Rating
-                        Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
+                              const SizedBox(height: 4),
                               Text(
-                                item["rating"],
+                                "${item["price"]} DZD",
                                 style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color.fromARGB(255, 46, 104, 69),
                                   fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                item["status"],
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color:
+                                      item["status"] == "Confirmed"
+                                          ? Colors.green
+                                          : Colors.red,
                                 ),
                               ),
                             ],
@@ -186,13 +165,9 @@ class _SavesScreenState extends State<SavesScreen> {
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                  );
+                },
+              ),
     );
   }
 }
