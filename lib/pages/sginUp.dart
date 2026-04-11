@@ -31,7 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final url = Uri.parse('https://1c84-129-45-8-202.ngrok-free.app/users');
+    final url = Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/users');  //  <<<<<<<<<==================
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -39,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "name": _nameController.text,
         "email": _emailController.text,
         "password": _passwordController.text,
-        "number": int.tryParse(_phoneController.text) ?? 0,
+        "number": int.tryParse(_phoneController.text) ?? 0,    // maybe 10 numbers and check
       }),
     );
     if (response.statusCode == 201) {
@@ -59,6 +59,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  
+  
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

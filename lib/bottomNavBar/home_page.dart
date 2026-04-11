@@ -13,25 +13,25 @@ class _HomePageState extends State<HomePage> {
       "title": "Salle de réunion",
       "subtitle": "sénia",
       "image": "img/Salles/sallederunion.jpeg",
-      "price": 500,
+      "price": 800,
     },
     {
       "title": "Salle de conférence",
       "subtitle": "Maravale",
       "image": "img/Salles/conferance.jpeg",
-      "price": 500,
+      "price": 1000,
     },
     {
       "title": "Salle de formation",
       "subtitle": "Maravale",
       "image": "img/Salles/formation.jpeg",
-      "price": 500,
+      "price": 700,
     },
     {
       "title": "Salle de réunion",
       "subtitle": "bir_eljir",
       "image": "img/Salles/runion_deux.jpeg",
-      "price": 500,
+      "price": 800,
     },
   ];
 
@@ -57,7 +57,6 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Custom styled headline instead of Card
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
@@ -79,7 +78,7 @@ class _HomePageState extends State<HomePage> {
             ),
 
             SizedBox(height: 15),
-            // Search bar and filter button
+///////////////////// Search bar and filter button
             Row(
               children: [
                 Expanded(
@@ -103,7 +102,7 @@ class _HomePageState extends State<HomePage> {
 
             SizedBox(height: 20),
 
-            // Book your room now button
+/////////////////////// Book your room now button
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
@@ -192,9 +191,9 @@ class _HomePageState extends State<HomePage> {
                   final room = rooms[index];
                   return GestureDetector(
                     onTap: () {
-                      // Different action for each room
+///////////////////////// Different action for each room
                       if (index == 0) {
-                        // Action for first room
+          //////////////// Action for first room
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Tapped Salle de réunion')),
                         );

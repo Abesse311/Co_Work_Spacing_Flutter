@@ -1,4 +1,4 @@
-// historiques de reservations
+// historiques de reservations /////////////////////// 1 
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -23,10 +23,10 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
 
   Future<void> fetchReservations() async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = 1;
+    final userId = prefs.getInt('user_id');
     if (userId == null) return;
 
-    final url = Uri.parse('http://localhost:5000/reservations/user/$userId');
+    final url = Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/reservations/user/$userId');  //  <<<<<<<<<==================
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -106,19 +106,19 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                             topLeft: Radius.circular(12),
                             bottomLeft: Radius.circular(12),
                           ),
-                          child: Image.network(
-                            item["image"],
-                            width: 120,
-                            height: 70,
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (context, error, stackTrace) => Image.asset(
+                          child: item["image"].toString().startsWith("data:image")
+                              ? Image.memory(
+                                  base64Decode(item["image"].toString().split(',').last),
+                                  width: 120,
+                                  height: 70,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.asset(
                                   "img/default_room.jpg",
                                   width: 120,
                                   height: 70,
                                   fit: BoxFit.cover,
                                 ),
-                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(

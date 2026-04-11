@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:convert'; ////  1
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,7 +27,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('https://1c84-129-45-8-202.ngrok-free.app/users/$userId'),
+        Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/users/$userId'),  //  <<<<<<<<<==================
       );
 
       if (response.statusCode == 200) {
@@ -269,7 +269,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
 
   Widget _buildInfoRow(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4), // Reduced from 10 to 4
+      padding: const EdgeInsets.symmetric(vertical: 4), 
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

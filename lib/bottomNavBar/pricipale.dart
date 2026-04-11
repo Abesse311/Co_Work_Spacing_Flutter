@@ -12,7 +12,7 @@ class MyWidget extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<MyWidget> {
-  int selectedIndex = 1;
+  int selectedIndex = 0;
   void navigation(int index) {
     setState(() {
       selectedIndex = index;
@@ -20,8 +20,8 @@ class _MyWidgetState extends State<MyWidget> {
   }
 
   List<Widget> pages = [
-    BalanceScreen(),
     HomePage(),
+    BalanceScreen(),
     ReservationsScreen(),
     SettingsScreen(),
   ];
@@ -67,7 +67,7 @@ class _MyWidgetState extends State<MyWidget> {
                 icon: Icon(
                   Icons.event_note,
                   size: 28,
-                ), // Changed icon for Bookings
+                ), 
                 label: 'Bookings',
               ),
               BottomNavigationBarItem(

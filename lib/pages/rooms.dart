@@ -1,7 +1,7 @@
-import 'dart:convert';
+import 'dart:convert'; /////////////////////////// 1
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/BookingPage.dart'; //https://1c84-129-45-8-202.ngrok-free.app
-import 'package:http/http.dart' as http; 
+import 'package:flutter_projet_tutore/BookingPage.dart';
+import 'package:http/http.dart' as http;
 
 class RoomsScreen extends StatefulWidget {
   final int locationId;
@@ -31,7 +31,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://1c84-129-45-8-202.ngrok-free.app/rooms/by-location/${widget.locationName}',
+          'https://ae3b-129-45-96-86.ngrok-free.app/rooms/by-location/${widget.locationName}',   //  <<<<<<<<<==================
         ),
       );
 
@@ -47,6 +47,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
                       price: double.parse(item['slot_price'].toString()),
                       address: '', // Ajoute l'adresse si dispo dans la réponse
                       imageBase64: item['image_base64'],
+                      capacity: item['capacity'] ?? 0, // <-- Add this line
                     ),
                   )
                   .toList();
@@ -88,6 +89,7 @@ class Room {
   final double price;
   final String address;
   final String? imageBase64;
+  final int capacity; // <-- Add this field
 
   Room({
     required this.id,
@@ -95,6 +97,7 @@ class Room {
     required this.price,
     required this.address,
     this.imageBase64,
+    required this.capacity, // <-- Add this parameter
   });
 }
 
@@ -115,8 +118,9 @@ class RoomItem extends StatelessWidget {
                   room: {
                     'id': room.id,
                     'name': room.name,
-                    'slot_price': room.price, // <-- corrige ici
+                    'slot_price': room.price,
                     'address': room.address,
+                    'capacity': room.capacity, // <-- Pass capacity if needed
                   },
                 ),
           ),
@@ -175,6 +179,11 @@ class RoomItem extends StatelessWidget {
                         color: Color.fromARGB(255, 46, 104, 69),
                         fontWeight: FontWeight.bold,
                       ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Capacity: ${room.capacity}', // <-- Show capacity here
+                      style: TextStyle(color: Colors.grey[700], fontSize: 14),
                     ),
                   ],
                 ),
