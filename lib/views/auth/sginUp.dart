@@ -1,76 +1,21 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/views/auth/sginIn.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_projet_tutore/controllers/auth_controller/SignUp_controller.dart';
+import 'package:flutter_projet_tutore/views/auth/SignIn.dart';
+import 'package:get/get.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
 
   @override
-  _RegisterScreenState createState() {
-    return _RegisterScreenState();
-  }
-}
-
-class _RegisterScreenState extends State<RegisterScreen> {
-  bool _obscureText = true;
-
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-
-  Future<void> _registerUser() async {
-    if (_nameController.text.isEmpty ||
-        _phoneController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _emailController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Veuillez remplir le champ Vide')));
-      return;
-    }
-
-    final url = Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/users');  //  <<<<<<<<<==================
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "name": _nameController.text,
-        "email": _emailController.text,
-        "password": _passwordController.text,
-        "number": int.tryParse(_phoneController.text) ?? 0,    // maybe 10 numbers and check
-      }),
-    );
-    if (response.statusCode == 201) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Inscription réussie !')));
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur: ${jsonDecode(response.body)['error']}'),
-        ),
-      );
-    }
-  }
-
-  
-  
-  
-  @override
   Widget build(BuildContext context) {
+    final Auth_SignUp_Controller controller = Get.put(Auth_SignUp_Controller());
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image illustration
             Container(
               height: 250,
               decoration: const BoxDecoration(color: Color(0xFFF5F5F5)),
@@ -78,14 +23,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Image.asset('img/sgine.jpg', fit: BoxFit.contain),
               ),
             ),
-
-            // Registration Form
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
                   const Text(
                     'Register',
                     style: TextStyle(
@@ -101,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Username field
+                  // Name
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
@@ -111,14 +53,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.person_outline,
-                            color: Colors.black54,
-                          ),
+                          const Icon(Icons.person_outline, color: Colors.black54),
                           const SizedBox(width: 10),
                           Expanded(
                             child: TextField(
-                              controller: _nameController,
+                              controller: controller.nameController,
                               decoration: const InputDecoration(
                                 hintText: 'User name',
                                 border: InputBorder.none,
@@ -132,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Email field
+                  // Email
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
@@ -146,7 +85,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: TextField(
-                              controller: _emailController,
+                              controller: controller.registerEmailController,
                               decoration: const InputDecoration(
                                 hintText: 'Email',
                                 border: InputBorder.none,
@@ -160,49 +99,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Password field
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.lock_outline, color: Colors.black54),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _passwordController,
-                              obscureText: _obscureText,
-                              decoration: const InputDecoration(
-                                hintText: '•••••••••••••••',
-                                border: InputBorder.none,
-                                hintStyle: TextStyle(color: Colors.black54),
+                  // Password
+                  Obx(
+                    () => Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.lock_outline, color: Colors.black54),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                controller: controller.registerPasswordController,
+                                obscureText: controller.obscureText.value,
+                                decoration: const InputDecoration(
+                                  hintText: '•••••••••••••••',
+                                  border: InputBorder.none,
+                                  hintStyle: TextStyle(color: Colors.black54),
+                                ),
                               ),
                             ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              _obscureText
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: Colors.black54,
+                            IconButton(
+                              icon: Icon(
+                                controller.obscureText.value
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Colors.black54,
+                              ),
+                              onPressed: controller.toggleObscure,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureText = !_obscureText;
-                              });
-                            },
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
 
-                  // Phone number field
+                  // Phone
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
@@ -216,10 +153,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: TextField(
-                              controller: _phoneController,
+                              controller: controller.phoneController,
                               keyboardType: TextInputType.phone,
                               decoration: const InputDecoration(
-                                hintText: 'phone number',
+                                hintText: 'Phone number',
                                 border: InputBorder.none,
                                 hintStyle: TextStyle(color: Colors.black54),
                               ),
@@ -231,14 +168,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Sign up button
+                  // Button
                   ElevatedButton(
-                    onPressed: _registerUser,
+                    onPressed: controller.registerUser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF3A5F4C),
-                      minimumSize: const Size.fromHeight(
-                        56,
-                      ), // Makes the button tall and full width
+                      minimumSize: const Size.fromHeight(56),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -254,7 +189,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Login link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -263,14 +197,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: TextStyle(fontSize: 16, color: Colors.black87),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => LoginScreen(),
-                            ),
-                          );
-                        },
+                        onTap: () => Get.to(() => LoginScreen()),
                         child: const Text(
                           'Log in',
                           style: TextStyle(

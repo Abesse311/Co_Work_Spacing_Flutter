@@ -1,86 +1,41 @@
-import 'dart:convert'; ////  1
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/balance_controller.dart';
+import 'package:get/get.dart';
 
-class BalanceScreen extends StatefulWidget {
+class BalanceScreen extends StatelessWidget {
   const BalanceScreen({super.key});
 
   @override
-  State<BalanceScreen> createState() => _BalanceScreenState();
-}
-
-class _BalanceScreenState extends State<BalanceScreen> {
-  User? currentUser;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchUserData();
-  }
-
-  Future<void> fetchUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    int? userId = prefs.getInt('user_id');
-    if (userId == null) return; // ou affiche une erreur
-
-    try {
-      final response = await http.get(
-        Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/users/$userId'),  //  <<<<<<<<<==================
-      );
-
-      if (response.statusCode == 200) {
-        final userData = json.decode(response.body);
-        setState(() {
-          currentUser = User.fromJson(userData);
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load user data');
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      // Affiche une erreur si besoin
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 46, 104, 69),
-        elevation: 0,
-        title: Row(
-          children: [
-            const Icon(
-              Icons.person,
-              size: 36,
-              color: Color.fromARGB(255, 255, 255, 255),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              currentUser?.name ?? 'Loading...', // Dynamic user name
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+    final BalanceController controller = Get.put(BalanceController());
+
+    return Obx(
+      () => Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 46, 104, 69),
+          elevation: 0,
+          title: Row(
+            children: [
+              const Icon(Icons.person, size: 36, color: Colors.white),
+              const SizedBox(width: 12),
+              Text(
+                controller.currentUser.value?.name ?? 'Loading...',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      body:
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
+        body: controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Wallet Balance
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
@@ -92,12 +47,8 @@ class _BalanceScreenState extends State<BalanceScreen> {
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color.fromARGB(
-                              255,
-                              46,
-                              104,
-                              69,
-                            ).withOpacity(0.3),
+                            color: const Color.fromARGB(255, 46, 104, 69)
+                                .withOpacity(0.3),
                             spreadRadius: 2,
                             blurRadius: 8,
                             offset: const Offset(0, 4),
@@ -107,7 +58,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
                       child: Column(
                         children: [
                           Text(
-                            '${currentUser?.balance.toStringAsFixed(2) ?? '0.00'} DZD',
+                            '${controller.currentUser.value?.balance.toStringAsFixed(2) ?? '0.00'} DZD',
                             style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
@@ -126,7 +77,6 @@ class _BalanceScreenState extends State<BalanceScreen> {
                         ],
                       ),
                     ),
-                    // Add this new section
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -151,12 +101,11 @@ class _BalanceScreenState extends State<BalanceScreen> {
                         ],
                       ),
                     ),
-                    // Original container continues here
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 255, 255),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: Colors.grey.shade200),
                         boxShadow: [
@@ -181,10 +130,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
                                   color: Colors.black54,
                                 ),
                               ),
-                              Image.asset(
-                                'icons/algerie_poste.jpg',
-                                height: 60,
-                              ),
+                              Image.asset('icons/algerie_poste.jpg', height: 60),
                             ],
                           ),
                           const SizedBox(height: 20),
@@ -196,7 +142,6 @@ class _BalanceScreenState extends State<BalanceScreen> {
                         ],
                       ),
                     ),
-                    // Add the information text
                     Padding(
                       padding: const EdgeInsets.all(20),
                       child: Container(
@@ -206,12 +151,8 @@ class _BalanceScreenState extends State<BalanceScreen> {
                           color: const Color.fromARGB(255, 243, 246, 244),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: const Color.fromARGB(
-                              255,
-                              46,
-                              104,
-                              69,
-                            ).withOpacity(0.3),
+                            color: const Color.fromARGB(255, 46, 104, 69)
+                                .withOpacity(0.3),
                           ),
                         ),
                         child: Column(
@@ -250,9 +191,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
                                   ),
                                   TextSpan(
                                     text: 'example@gmail.com',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
@@ -264,12 +203,13 @@ class _BalanceScreenState extends State<BalanceScreen> {
                   ],
                 ),
               ),
+      ),
     );
   }
 
   Widget _buildInfoRow(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4), 
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -291,32 +231,6 @@ class _BalanceScreenState extends State<BalanceScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class User {
-  final int id;
-  final String name;
-  final String email;
-  final String role;
-  final double balance;
-
-  User({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.role,
-    required this.balance,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      role: json['role'],
-      balance: double.parse(json['balance'].toString()),
     );
   }
 }

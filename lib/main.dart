@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/views/auth/sginUp.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/pricipale.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/principale.dart';
 //import 'package:flutter_projet_tutore/pages/sgin.dart';
 
 void main() {
@@ -12,13 +13,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'SF Pro Display',
         //scaffoldBackgroundColor: Colors.white,
       ),
-      home: RegisterScreen(),
+      home: MyWidget(),
 
     );
   }

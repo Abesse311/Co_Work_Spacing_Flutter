@@ -1,42 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/views/La_Reservation_prosses/Locations.dart';
+import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/HomePage_controller.dart';
+import 'package:get/get.dart';
+import 'package:flutter_projet_tutore/helper/room_Tile.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  // Room data list
-  final List<Map<String, dynamic>> rooms = [
-    {
-      "title": "Salle de réunion",
-      "subtitle": "sénia",
-      "image": "img/Salles/sallederunion.jpeg",
-      "price": 800,
-    },
-    {
-      "title": "Salle de conférence",
-      "subtitle": "Maravale",
-      "image": "img/Salles/conferance.jpeg",
-      "price": 1000,
-    },
-    {
-      "title": "Salle de formation",
-      "subtitle": "Maravale",
-      "image": "img/Salles/formation.jpeg",
-      "price": 700,
-    },
-    {
-      "title": "Salle de réunion",
-      "subtitle": "bir_eljir",
-      "image": "img/Salles/runion_deux.jpeg",
-      "price": 800,
-    },
-  ];
-
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final HomeController controller = Get.put(HomeController());
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 46, 104, 69),
@@ -50,8 +21,6 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: true,
       ),
-
-      //================================================= BODY =================================================//
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -76,9 +45,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-
             SizedBox(height: 15),
-///////////////////// Search bar and filter button
             Row(
               children: [
                 Expanded(
@@ -99,10 +66,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-
             SizedBox(height: 20),
-
-/////////////////////// Book your room now button
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
@@ -125,27 +89,7 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) =>
-                                  LocationsScreen(),
-                          transitionsBuilder: (
-                            context,
-                            animation,
-                            secondaryAnimation,
-                            child,
-                          ) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: child,
-                            );
-                          },
-                          transitionDuration: Duration(milliseconds: 500),
-                        ),
-                      );
-                    },
+                    onTap: controller.goToLocations,
                     child: Container(
                       padding: EdgeInsets.all(14),
                       decoration: BoxDecoration(
@@ -172,110 +116,21 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-
             SizedBox(height: 20),
-
-            // Recommended section
             Text(
               'Suggested for you',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-
             SizedBox(height: 15),
-
-            // Room list with ListView.builder
             Expanded(
-              child: ListView.builder(
-                itemCount: rooms.length,
-                itemBuilder: (context, index) {
-                  final room = rooms[index];
-                  return GestureDetector(
-                    onTap: () {
-///////////////////////// Different action for each room
-                      if (index == 0) {
-          //////////////// Action for first room
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Tapped Salle de réunion')),
-                        );
-                      } else if (index == 1) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Tapped Salle de conférence')),
-                        );
-                      } else if (index == 2) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Tapped Salle de formation')),
-                        );
-                      } else if (index == 3) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Tapped Salle de réunion 31')),
-                        );
-                      }
-                    },
-                    child: Container(
-                      margin: EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 228, 228, 228),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
-                            spreadRadius: 1,
-                            blurRadius: 2,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(12),
-                              bottomLeft: Radius.circular(12),
-                            ),
-                            child: Image.asset(
-                              room["image"],
-                              width: 120,
-                              height: 70,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  room["title"],
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  room["subtitle"],
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  "${room["price"]} DZD/hour",
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 46, 104, 69),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  RommTile(title: "salle de runion", subtitle: "maravale", img_path: "img/Salles/sallederunion.jpeg", price: 800),
+                  RommTile(title: "salle de runion", subtitle: "maravale", img_path: "img/Salles/formation.jpeg", price: 800),
+                  RommTile(title: "salle de runion", subtitle: "maravale", img_path: "img/Salles/runion_deux.jpeg", price: 800),
+                  RommTile(title: "salle de runion", subtitle: "maravale", img_path: "img/Salles/conferance.jpeg", price: 800),
+                ],
               ),
             ),
           ],
