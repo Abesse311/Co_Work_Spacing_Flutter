@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/pages/sginIn.dart';
+import 'package:flutter_projet_tutore/views/auth/sginIn.dart';
 import 'package:http/http.dart' as http;
 
 class RegisterScreen extends StatefulWidget {

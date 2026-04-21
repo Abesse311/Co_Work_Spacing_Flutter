@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart'; ////////////// 1
-import 'package:flutter_projet_tutore/pages/sginIn.dart';
-import 'package:flutter_projet_tutore/pages_parametres/AccountSettingsScreen.dart';
+import 'package:flutter_projet_tutore/views/auth/sginIn.dart';
+import 'package:flutter_projet_tutore/views/Settings_Pages/Profile_Settings_Screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;

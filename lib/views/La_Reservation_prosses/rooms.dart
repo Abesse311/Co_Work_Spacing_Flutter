@@ -1,6 +1,7 @@
 import 'dart:convert'; /////////////////////////// 1
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/BookingPage.dart';
+// import 'package:flutter_projet_tutore/BookingPage.dart';
+import 'package:flutter_projet_tutore/views/La_Reservation_prosses/BookingPage.dart';
 import 'package:http/http.dart' as http;
 
 class RoomsScreen extends StatefulWidget {

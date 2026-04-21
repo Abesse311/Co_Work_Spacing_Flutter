@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/pages/Locations.dart';
+import 'package:flutter_projet_tutore/views/La_Reservation_prosses/Locations.dart';
 
 class HomePage extends StatefulWidget {
   @override

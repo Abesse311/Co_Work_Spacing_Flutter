@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/pages/sginUp.dart';
+import 'package:flutter_projet_tutore/views/auth/sginUp.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/pricipale.dart';
 //import 'package:flutter_projet_tutore/pages/sgin.dart';
 
 void main() {

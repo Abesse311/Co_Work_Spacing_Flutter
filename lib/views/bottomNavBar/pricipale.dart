@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/balance.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/reservations.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/settings.dart';
-import 'package:flutter_projet_tutore/bottomNavBar/home_page.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/balance.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/reservations.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/settings.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/home_page.dart';
 
 class MyWidget extends StatefulWidget {
   const MyWidget({super.key});
