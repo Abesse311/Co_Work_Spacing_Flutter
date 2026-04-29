@@ -1,5 +1,6 @@
 import 'dart:convert'; /////////////////////////// 1
 import 'package:flutter/material.dart';
+import 'package:flutter_projet_tutore/variables.dart';
 // import 'package:flutter_projet_tutore/BookingPage.dart';
 import 'package:flutter_projet_tutore/views/La_Reservation_prosses/BookingPage.dart';
 import 'package:http/http.dart' as http;
@@ -32,7 +33,7 @@ class _RoomsScreenState extends State<RoomsScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://ae3b-129-45-96-86.ngrok-free.app/rooms/by-location/${widget.locationName}',   //  <<<<<<<<<==================
+          '${ngrok_url}/rooms/by-location/${widget.locationName}',   //  <<<<<<<<<==================
         ),
       );
 

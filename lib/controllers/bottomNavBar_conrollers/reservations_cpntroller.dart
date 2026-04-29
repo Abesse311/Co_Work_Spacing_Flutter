@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_projet_tutore/variables.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +22,7 @@ class ReservationsController extends GetxController {
 
     try {
       final response = await http.get(
-        Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/reservations/user/$userId'),
+        Uri.parse('${ngrok_url}/reservations/user/$userId'),
       );
 
       if (response.statusCode == 200) {

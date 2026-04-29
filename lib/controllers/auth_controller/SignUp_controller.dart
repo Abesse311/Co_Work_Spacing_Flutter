@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_projet_tutore/variables.dart';
 import 'package:flutter_projet_tutore/views/auth/SignIn.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -46,7 +47,7 @@ class Auth_SignUp_Controller extends GetxController {
       return;
     }
 
-    final url = Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/login');
+    final url = Uri.parse('${ngrok_url}/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -79,7 +80,7 @@ class Auth_SignUp_Controller extends GetxController {
       return;
     }
 
-    final url = Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/users');
+    final url = Uri.parse('${ngrok_url}/users');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

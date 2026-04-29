@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
     final Auth_SignUp_Controller controller = Get.put(Auth_SignUp_Controller());

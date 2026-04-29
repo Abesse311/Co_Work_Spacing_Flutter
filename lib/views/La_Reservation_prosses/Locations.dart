@@ -1,4 +1,5 @@
-import 'dart:convert'; //////////////////// 1
+import 'dart:convert'; import 'package:flutter_projet_tutore/variables.dart';
+//////////////////// 1
 // import 'package:flutter_projet_tutore/pages/Rooms.dart';
 import 'package:flutter_projet_tutore/views/La_Reservation_prosses/rooms.dart';
 import 'package:http/http.dart' as http;
@@ -22,7 +23,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   Future<void> fetchLocations() async {
     final response = await http.get(
-      Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/locations'),  //  <<<<<<<<<==================
+      Uri.parse('${ngrok_url}/locations'),  //  <<<<<<<<<==================
     );
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);

@@ -42,7 +42,9 @@ class MyWidget extends StatelessWidget {
               backgroundColor: Colors.transparent,
               elevation: 0,
               currentIndex: controller.selectedIndex.value,
+
               onTap: controller.navigation,
+              
               type: BottomNavigationBarType.fixed,
               selectedItemColor: Color.fromARGB(255, 46, 104, 69),
               unselectedItemColor: const Color.fromARGB(255, 120, 120, 120),
