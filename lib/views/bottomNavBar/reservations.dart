@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/reservations_cpntroller.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/models/reservation_model.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class ReservationsScreen extends StatelessWidget {
   const ReservationsScreen({Key? key}) : super(key: key);
@@ -14,17 +15,10 @@ class ReservationsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 46, 104, 69),
-        elevation: 0,
-        title: const Text(
+        title: Text(
           'My Reservations',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          style: Theme.of(context).textTheme.titleLarge,
         ),
-        centerTitle: true,
       ),
       body: Obx(
         () => controller.isLoading.value
@@ -38,18 +32,7 @@ class ReservationsScreen extends StatelessWidget {
                       final Reservation item = controller.reservations[index];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
-                              spreadRadius: 1,
-                              blurRadius: 2,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
-                        ),
+                        decoration: AppTheme.cardDecoration,
                         child: Row(
                           children: [
                             ClipRRect(
@@ -87,7 +70,7 @@ class ReservationsScreen extends StatelessWidget {
                                   Text(
                                     item.subtitle,
                                     style: TextStyle(
-                                      color: Colors.grey[600],
+                                      color: AppTheme.textSecondary,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -96,7 +79,7 @@ class ReservationsScreen extends StatelessWidget {
                                     "${item.price} DZD",
                                     style: const TextStyle(
                                       fontSize: 14,
-                                      color: Color.fromARGB(255, 46, 104, 69),
+                                      color: AppTheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -106,8 +89,8 @@ class ReservationsScreen extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: item.status == "Confirmed"
-                                          ? Colors.green
-                                          : Colors.red,
+                                          ? AppTheme.success
+                                          : AppTheme.errorLight,
                                     ),
                                   ),
                                 ],

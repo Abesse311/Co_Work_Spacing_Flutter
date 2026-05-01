@@ -2,63 +2,60 @@ import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignUp_controller.dart';
 import 'package:flutter_projet_tutore/views/auth/SignIn.dart';
 import 'package:get/get.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     final Auth_SignUp_Controller controller = Get.put(Auth_SignUp_Controller());
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.background,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
               height: 250,
-              decoration: const BoxDecoration(color: Color(0xFFF5F5F5)),
+              decoration:  BoxDecoration(color: AppTheme.backgroundLight),
               child: Center(
                 child: Image.asset('img/sgine.jpg', fit: BoxFit.contain),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding:  EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Register',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: Theme.of(context).textTheme.headlineLarge,
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
+                   SizedBox(height: 4),
+                  Text(
                     'Please register to log in.',
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                    style: Theme.of(context).textTheme.labelLarge,
                   ),
-                  const SizedBox(height: 32),
+                   SizedBox(height: 32),
 
                   // Name
                   Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    decoration: AppTheme.inputDecoration,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding:  EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
-                          const Icon(Icons.person_outline, color: Colors.black54),
-                          const SizedBox(width: 10),
+                           Icon(
+                            Icons.person_outline,
+                            color: Colors.black54,
+                          ),
+                           SizedBox(width: 10),
                           Expanded(
                             child: TextField(
                               controller: controller.nameController,
-                              decoration: const InputDecoration(
+                              decoration:  InputDecoration(
                                 hintText: 'User name',
                                 border: InputBorder.none,
                                 hintStyle: TextStyle(color: Colors.black54),
@@ -69,24 +66,21 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                   SizedBox(height: 16),
 
                   // Email
                   Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    decoration: AppTheme.inputDecoration,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding:  EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
-                          const Icon(Icons.email, color: Colors.black54),
-                          const SizedBox(width: 10),
+                           Icon(Icons.email, color: Colors.black54),
+                           SizedBox(width: 10),
                           Expanded(
                             child: TextField(
                               controller: controller.registerEmailController,
-                              decoration: const InputDecoration(
+                              decoration:  InputDecoration(
                                 hintText: 'Email',
                                 border: InputBorder.none,
                                 hintStyle: TextStyle(color: Colors.black54),
@@ -97,26 +91,27 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                   SizedBox(height: 16),
 
                   // Password
                   Obx(
                     () => Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      decoration: AppTheme.inputDecoration,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding:  EdgeInsets.symmetric(horizontal: 16.0),
                         child: Row(
                           children: [
-                            const Icon(Icons.lock_outline, color: Colors.black54),
-                            const SizedBox(width: 10),
+                             Icon(
+                              Icons.lock_outline,
+                              color: Colors.black54,
+                            ),
+                             SizedBox(width: 10),
                             Expanded(
                               child: TextField(
-                                controller: controller.registerPasswordController,
+                                controller:
+                                    controller.registerPasswordController,
                                 obscureText: controller.obscureText.value,
-                                decoration: const InputDecoration(
+                                decoration:  InputDecoration(
                                   hintText: '•••••••••••••••',
                                   border: InputBorder.none,
                                   hintStyle: TextStyle(color: Colors.black54),
@@ -137,25 +132,22 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                   SizedBox(height: 16),
 
                   // Phone
                   Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    decoration: AppTheme.inputDecoration,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding:  EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
-                          const Icon(Icons.phone, color: Colors.black54),
-                          const SizedBox(width: 10),
+                           Icon(Icons.phone, color: Colors.black54),
+                           SizedBox(width: 10),
                           Expanded(
                             child: TextField(
                               controller: controller.phoneController,
                               keyboardType: TextInputType.phone,
-                              decoration: const InputDecoration(
+                              decoration:  InputDecoration(
                                 hintText: 'Phone number',
                                 border: InputBorder.none,
                                 hintStyle: TextStyle(color: Colors.black54),
@@ -166,19 +158,12 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                   SizedBox(height: 24),
 
                   // Button
                   ElevatedButton(
                     onPressed: controller.registerUser,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3A5F4C),
-                      minimumSize: const Size.fromHeight(56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text(
+                    child:  Text(
                       'Sign up',
                       style: TextStyle(
                         fontSize: 18,
@@ -187,22 +172,22 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                   SizedBox(height: 24),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                       Text(
                         'already have account? ',
                         style: TextStyle(fontSize: 16, color: Colors.black87),
                       ),
                       GestureDetector(
                         onTap: () => Get.to(() => LoginScreen()),
-                        child: const Text(
+                        child:  Text(
                           'Log in',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Color(0xFF2E6845),
+                            color: AppTheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

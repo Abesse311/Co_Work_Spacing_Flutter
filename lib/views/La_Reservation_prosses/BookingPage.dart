@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/Reservation_prosses/booking_controller.dart';
 import 'package:get/get.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class RoomBookingPage extends StatelessWidget {
   final Map<String, dynamic> room;
@@ -16,7 +17,6 @@ class RoomBookingPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Réservation - ${room['name']}'),
-        backgroundColor: Color.fromARGB(255, 46, 104, 69),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -60,8 +60,8 @@ class RoomBookingPage extends StatelessWidget {
                                   color: isSelected
                                       ? Colors.blue
                                       : isAvailable
-                                          ? Colors.green[200]
-                                          : Colors.grey[400],
+                                          ? AppTheme.success.withOpacity(0.4)
+                                          : AppTheme.textGrey,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Center(

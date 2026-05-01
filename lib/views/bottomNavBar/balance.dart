@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/balance_controller.dart';
 import 'package:get/get.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class BalanceScreen extends StatelessWidget {
   const BalanceScreen({super.key});
@@ -12,8 +13,6 @@ class BalanceScreen extends StatelessWidget {
     return Obx(
       () => Scaffold(
         appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 46, 104, 69),
-          elevation: 0,
           title: Row(
             children: [
               const Icon(Icons.person, size: 36, color: Colors.white),
@@ -43,12 +42,11 @@ class BalanceScreen extends StatelessWidget {
                         horizontal: 25,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 46, 104, 69),
+                        color: AppTheme.primary,
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color.fromARGB(255, 46, 104, 69)
-                                .withOpacity(0.3),
+                            color: AppTheme.primary.withOpacity(0.3),
                             spreadRadius: 2,
                             blurRadius: 8,
                             offset: const Offset(0, 4),
@@ -87,7 +85,7 @@ class BalanceScreen extends StatelessWidget {
                           const Icon(
                             Icons.info_outline,
                             size: 20,
-                            color: Color.fromARGB(255, 46, 104, 69),
+                            color: AppTheme.primary,
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -107,7 +105,7 @@ class BalanceScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: AppTheme.border),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.1),
@@ -147,14 +145,7 @@ class BalanceScreen extends StatelessWidget {
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 243, 246, 244),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 46, 104, 69)
-                                .withOpacity(0.3),
-                          ),
-                        ),
+                        decoration: AppTheme.infoContainerDecoration,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -163,7 +154,7 @@ class BalanceScreen extends StatelessWidget {
                                 Icon(
                                   Icons.info_outline,
                                   size: 20,
-                                  color: Color.fromARGB(255, 170, 34, 19),
+                                  color: AppTheme.error,
                                 ),
                                 SizedBox(width: 8),
                                 Text(
@@ -171,7 +162,7 @@ class BalanceScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Color.fromARGB(255, 170, 34, 19),
+                                    color: AppTheme.error,
                                   ),
                                 ),
                               ],

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/Reservation_prosses/rooms_controller.dart';
-import 'package:flutter_projet_tutore/helper/for%20Reserv_prosses/room_item.dart';
+import 'package:flutter_projet_tutore/core/helper/for%20Reserv_prosses/room_item.dart';
 import 'package:get/get.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class RoomsScreen extends StatelessWidget {
   final int locationId;
@@ -22,7 +23,7 @@ class RoomsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('$locationName Rooms'),
-        backgroundColor: Color.fromARGB(255, 37, 77, 53),
+        backgroundColor: AppTheme.primaryDark,
       ),
       body: Obx(
         () => controller.isLoading.value

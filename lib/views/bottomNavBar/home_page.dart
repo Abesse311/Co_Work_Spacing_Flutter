@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/HomePage_controller.dart';
 import 'package:get/get.dart';
-import 'package:flutter_projet_tutore/helper/room_Tile.dart';
+import 'package:flutter_projet_tutore/core/helper/room_Tile.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -10,16 +11,14 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 46, 104, 69),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.home_rounded, color: Colors.white, size: 28),
             SizedBox(width: 10),
-            Text("Home", style: TextStyle(fontSize: 24, color: Colors.white)),
+            Text("Home", style: Theme.of(context).textTheme.headlineMedium),
           ],
         ),
-        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -30,11 +29,7 @@ class HomePage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
                 "Your fresh and comfortable Space",
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Color.fromARGB(255, 46, 104, 69),
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   shadows: [
                     Shadow(
                       color: Colors.grey.withOpacity(0.2),
@@ -50,10 +45,7 @@ class HomePage extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                    decoration: AppTheme.searchBarDecoration,
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: 'Search Now',
@@ -75,14 +67,14 @@ class HomePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.green.withOpacity(0.08),
+                    color: AppTheme.success.withOpacity(0.08),
                     blurRadius: 12,
                     spreadRadius: 2,
                     offset: Offset(0, 4),
                   ),
                 ],
                 border: Border.all(
-                  color: Color.fromARGB(255, 46, 104, 69).withOpacity(0.12),
+                  color: AppTheme.primary.withOpacity(0.12),
                   width: 1,
                 ),
               ),
@@ -93,7 +85,7 @@ class HomePage extends StatelessWidget {
                     child: Container(
                       padding: EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.redAccent.withOpacity(0.18),
+                        color: AppTheme.errorBackground.withOpacity(0.18),
                         shape: BoxShape.circle,
                       ),
                       child: Image.asset(
@@ -109,7 +101,7 @@ class HomePage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
-                      color: Color.fromARGB(255, 46, 104, 69),
+                      color: AppTheme.primary,
                       letterSpacing: 0.2,
                     ),
                   ),
@@ -126,10 +118,30 @@ class HomePage extends StatelessWidget {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  RommTile(title: "salle de runion", subtitle: "maravale", img_path: "img/Salles/sallederunion.jpeg", price: 800),
-                  RommTile(title: "salle de runion", subtitle: "maravale", img_path: "img/Salles/formation.jpeg", price: 800),
-                  RommTile(title: "salle de runion", subtitle: "maravale", img_path: "img/Salles/runion_deux.jpeg", price: 800),
-                  RommTile(title: "salle de runion", subtitle: "maravale", img_path: "img/Salles/conferance.jpeg", price: 800),
+                  RommTile(
+                    title: "salle de runion",
+                    subtitle: "maravale",
+                    img_path: "img/Salles/sallederunion.jpeg",
+                    price: 800,
+                  ),
+                  RommTile(
+                    title: "salle de runion",
+                    subtitle: "maravale",
+                    img_path: "img/Salles/formation.jpeg",
+                    price: 800,
+                  ),
+                  RommTile(
+                    title: "salle de runion",
+                    subtitle: "maravale",
+                    img_path: "img/Salles/runion_deux.jpeg",
+                    price: 800,
+                  ),
+                  RommTile(
+                    title: "salle de runion",
+                    subtitle: "maravale",
+                    img_path: "img/Salles/conferance.jpeg",
+                    price: 800,
+                  ),
                 ],
               ),
             ),

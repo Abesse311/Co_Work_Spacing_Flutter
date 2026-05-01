@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/balance_controller.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/settings_controller.dart';
 import 'package:get/get.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -13,11 +14,9 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 46, 104, 69),
-        elevation: 0,
-        title: const Text(
+        title: Text(
           'Account',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
       body: ListView(
@@ -29,7 +28,7 @@ class SettingsScreen extends StatelessWidget {
                 const Icon(
                   Icons.person,
                   size: 48,
-                  color: Color.fromARGB(255, 46, 104, 69),
+                  color: AppTheme.primary,
                 ),
                 const SizedBox(width: 16),
                 Obx(
@@ -46,49 +45,49 @@ class SettingsScreen extends StatelessWidget {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.person, color: Colors.grey),
+            leading: const Icon(Icons.person, color: AppTheme.textGrey),
             title: const Text(
               'Account',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             subtitle: const Text(
               'change email or number',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
+              style: TextStyle(fontSize: 13, color: AppTheme.textGrey),
             ),
             onTap: controller.goToAccountSettings,
           ),
           ListTile(
-            leading: const Icon(Icons.notifications_none, color: Colors.grey),
+            leading: const Icon(Icons.notifications_none, color: AppTheme.textGrey),
             title: const Text(
               'Notifications',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             subtitle: const Text(
               'Enable or disable app notifications',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
+              style: TextStyle(fontSize: 13, color: AppTheme.textGrey),
             ),
             onTap: controller.showNotificationsDialog,
           ),
           ListTile(
-            leading: const Icon(Icons.help_outline, color: Colors.grey),
+            leading: const Icon(Icons.help_outline, color: AppTheme.textGrey),
             title: const Text(
               'Help',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             subtitle: const Text(
               'Help center, contact us',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
+              style: TextStyle(fontSize: 13, color: AppTheme.textGrey),
             ),
             onTap: controller.showHelpDialog,
           ),
           ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
+            leading: const Icon(Icons.logout, color: AppTheme.errorLight),
             title: const Text(
               'Disconnect',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: Colors.red,
+                color: AppTheme.errorLight,
               ),
             ),
             onTap: controller.showLogoutDialog,

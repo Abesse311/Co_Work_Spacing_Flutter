@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/Reservation_prosses/locations_controller.dart';
-import 'package:flutter_projet_tutore/helper/for%20Reserv_prosses/location_card.dart';
+import 'package:flutter_projet_tutore/core/helper/for%20Reserv_prosses/location_card.dart';
 import 'package:get/get.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class LocationsScreen extends StatelessWidget {
   const LocationsScreen({super.key});
@@ -13,7 +14,7 @@ class LocationsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Locations"),
-        backgroundColor: Color.fromARGB(255, 37, 77, 53),
+        backgroundColor: AppTheme.primaryDark,
       ),
       backgroundColor: Colors.grey[100],
       body: Padding(
@@ -43,7 +44,7 @@ class LocationsScreen extends StatelessWidget {
                         color: Colors.grey[200],
                         borderRadius: BorderRadius.circular(8.0),
                         border: Border.all(
-                          color: Colors.grey[300]!,
+                          color: AppTheme.border,
                           width: 1.0,
                         ),
                       ),
@@ -51,7 +52,7 @@ class LocationsScreen extends StatelessWidget {
                         "Note: Tous nos emplacements disposent d'une salle de repos et d'une salle à manger.",
                         style: TextStyle(
                           fontSize: 14.0,
-                          color: Colors.grey,
+                          color: AppTheme.textGrey,
                           fontStyle: FontStyle.italic,
                         ),
                         textAlign: TextAlign.center,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignIn_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/views/auth/sginUp.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -11,111 +12,87 @@ class LoginScreen extends StatelessWidget {
     final Auth_SignIn_Controller controller = Get.put(Auth_SignIn_Controller());
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding:  EdgeInsets.all(24.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.stretch, 
               children: [
                 Container(
                   height: 220,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5DC),
+                    color: AppTheme.backgroundBeige,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
                     child: Image.asset('img/sgine.jpg', fit: BoxFit.contain),
                   ),
                 ),
-                const SizedBox(height: 24),
-                const Text(
+                 SizedBox(height: 24),
+                 Text(
                   'Login',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: Theme.of(context).textTheme.headlineLarge,
                 ),
-                const SizedBox(height: 8),
-                const Text(
+                 SizedBox(height: 8),
+                 Text(
                   'Please log in to continue.',
-                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                  style: Theme.of(context).textTheme.labelLarge,
                 ),
-                const SizedBox(height: 32),
+                 SizedBox(height: 32),
                 Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  decoration: AppTheme.inputDecoration,
                   child: TextField(
                     controller: controller.emailController,
                     decoration: InputDecoration(
                       hintText: 'Email',
-                      border: InputBorder.none,
                       prefixIcon: Icon(
                         Icons.email,
-                        color: Colors.grey.shade700,
+                        color: AppTheme.textSecondary,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                 SizedBox(height: 16),
                 Obx(
                   () => Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    decoration: AppTheme.inputDecoration,
                     child: TextField(
                       controller: controller.passwordController,
                       obscureText: controller.obscureText.value,
                       decoration: InputDecoration(
-                        hintText: '••••••••••••••••',
-                        border: InputBorder.none,
-                        prefixIcon: Icon(
-                          Icons.lock_outline,
-                          color: Colors.grey.shade700,
+                      hintText: '••••••••••••••••',
+                      prefixIcon: Icon(
+                        Icons.lock_outline,
+                        color: AppTheme.textSecondary,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.obscureText.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppTheme.textSecondary,
                         ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            controller.obscureText.value
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: Colors.grey.shade700,
-                          ),
-                          onPressed: controller.toggleObscure,
-                        ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 16),
+                        onPressed: controller.toggleObscure,
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: controller.loginUser,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E6845),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                ),
+                 SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: controller.loginUser,
+                  child:  Text(
                     'Log in',
-                    style: TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(height: 24),
+                 SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                     Text(
                       'already have account? ',
                       style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
@@ -126,7 +103,7 @@ class LoginScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2E6845),
+                          color: AppTheme.primary,
                         ),
                       ),
                     ),

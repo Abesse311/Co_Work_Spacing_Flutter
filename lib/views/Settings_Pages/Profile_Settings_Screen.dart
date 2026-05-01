@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/settings_controllers/account_settings_controller.dart';
 import 'package:get/get.dart';
+import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
   const AccountSettingsScreen({Key? key}) : super(key: key);
@@ -13,8 +14,6 @@ class AccountSettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Account Settings'),
-        elevation: 0,
-        backgroundColor: Color.fromARGB(255, 46, 104, 69),
       ),
       body: Obx(
         () => controller.isLoading.value
@@ -27,16 +26,12 @@ class AccountSettingsScreen extends StatelessWidget {
                       Icon(
                         Icons.person,
                         size: 40,
-                        color: Color.fromARGB(255, 46, 104, 69),
+                        color: AppTheme.primary,
                       ),
                       const SizedBox(width: 10),
                       Text(
                         'Personal Information',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(
-                          color: Color.fromARGB(255, 46, 104, 69),
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
                     ],
                   ),

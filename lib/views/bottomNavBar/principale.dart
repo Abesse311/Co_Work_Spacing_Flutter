@@ -39,17 +39,9 @@ class MyWidget extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: BottomNavigationBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
               currentIndex: controller.selectedIndex.value,
 
               onTap: controller.navigation,
-              
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: Color.fromARGB(255, 46, 104, 69),
-              unselectedItemColor: const Color.fromARGB(255, 120, 120, 120),
-              showSelectedLabels: true,
-              showUnselectedLabels: false,
               items: [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home_rounded, size: 32),
