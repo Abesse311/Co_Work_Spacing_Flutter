@@ -1,10 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/variables.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/principale.dart';
+import 'package:flutter_projet_tutore/views/auth/verifyScreen.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Auth_SignUp_Controller extends GetxController {
@@ -29,24 +25,93 @@ class Auth_SignUp_Controller extends GetxController {
 
 
   void registerEmail_password() async {
+    // ── Basic validation ────────────────────────────────────────────────────
+    final name = nameController.text.trim();
+    final email = registerEmailController.text.trim();
+    final password = registerPasswordController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      Get.snackbar(
+        'Empty Fields',
+        'Please fill in all required fields.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (!GetUtils.isEmail(email)) {
+      Get.snackbar(
+        'Invalid Email',
+        'Please enter a valid email address.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      Get.snackbar(
+        'Weak Password',
+        'Password must be at least 6 characters.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // ── Firebase account creation ───────────────────────────────────────────
     try {
       final credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
-            email: registerEmailController.text.trim(), // Access the text property
-            password:
-                registerPasswordController.text.trim(), // Access the text property
+            email: email,
+            password: password,
           );
-          Get.off(MyWidget());
 
-      print('User registered successfully: ${credential.user?.email}');
+      // Update display name
+      await credential.user?.updateDisplayName(name);
+
+      // Send verification email immediately — do NOT go to Home yet
+      await credential.user?.sendEmailVerification();
+
+      // Route to the blocking Verify Email screen
+      Get.offAll(() => const VerifyEmailScreen());
+
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        ('The password provided is too weak.');
+        Get.snackbar(
+          'Weak Password',
+          'The password provided is too weak.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       } else if (e.code == 'email-already-in-use') {
-        Get.snackbar("Error",'The account already exists for that email.');
+        Get.snackbar(
+          'Error',
+          'An account already exists for that email.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else if (e.code == 'invalid-email') {
+        Get.snackbar(
+          'Invalid Email',
+          'The email address is badly formatted.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else if (e.code == 'too-many-requests') {
+        Get.snackbar(
+          'Too Many Requests',
+          'Please wait a moment before trying again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          e.message ?? 'An error occurred during registration.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
-      print(e);
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 

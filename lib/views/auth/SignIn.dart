@@ -99,9 +99,23 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
 
-                 SizedBox(height: 32),
+                /////////////////////////////// FORGOT PASSWORD
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: controller.forgotPassword,
+                    child: Text(
+                      'Forgot password?',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                  ),
+                ),
 
-                /////////////////////////////// LOG IN BUTTON 
+                /////////////////////////////// LOG IN BUTTON
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14.0),

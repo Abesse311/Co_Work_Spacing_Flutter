@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_projet_tutore/controllers/auth_controller/VerifyEmail_controller.dart';
+import 'package:flutter_projet_tutore/controllers/auth_controller/VerifyEmail_controller.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 import 'package:get/get.dart';
 
@@ -8,7 +8,7 @@ class VerifyEmailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final VerifyEmailController controller = Get.put(VerifyEmailController());
+    final VerifyEmailController controller = Get.put(VerifyEmailController());
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -43,12 +43,14 @@ class VerifyEmailScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
+
+                // ── "I have verified" ─────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14.0),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: controller.checkEmailVerified,
                       child: const Text(
                         'I have verified',
                         style: TextStyle(
@@ -57,13 +59,16 @@ class VerifyEmailScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 16),
+
+                // ── "Resend email" ────────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14.0),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: controller.resendVerificationEmail,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.backgroundLight,
                         foregroundColor: AppTheme.textPrimary,
@@ -81,9 +86,12 @@ class VerifyEmailScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 24),
+
+                // ── "Logout" ──────────────────────────────────────────────
                 TextButton(
-                  onPressed: () {},
+                  onPressed: controller.logout,
                   child: const Text(
                     'Logout',
                     style: TextStyle(
