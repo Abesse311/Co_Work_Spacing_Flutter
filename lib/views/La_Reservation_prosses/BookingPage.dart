@@ -16,7 +16,8 @@ class RoomBookingPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Réservation - ${room['name']}'),
+        title: Text('Reservation - ${room['name']}'),
+        
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -39,39 +40,53 @@ class RoomBookingPage extends StatelessWidget {
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 4,
-                            childAspectRatio: 2.5,
+                            childAspectRatio: 1.5,
                           ),
                           itemCount: slots.length,
                           itemBuilder: (context, i) {
                             final slot = slots[i];
                             final isAvailable = slot['status'] == 'available';
-                            final isSelected = date == controller.selectedDate.value &&
-                                (slot['slot'] == controller.selectedStart.value ||
-                                    slot['slot'] == controller.selectedEnd.value);
 
-                            return GestureDetector(
-                              onTap: isAvailable
-                                  ? () => controller.selectSlot(date, slot['slot'])
-                                  : null,
-                              child: Container(
-                                margin: EdgeInsets.all(4),
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? Colors.blue
-                                      : isAvailable
-                                          ? AppTheme.success.withOpacity(0.4)
-                                          : AppTheme.textGrey,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    slot['slot'],
-                                    style: TextStyle(fontSize: 12),
+                            return Obx(() {
+                              bool isSelected = false;
+                              if (date == controller.selectedDate.value) {
+                                if (controller.selectedEnd.value == null) {
+                                  isSelected = slot['slot'] == controller.selectedStart.value;
+                                } else {
+                                  int currentHour = int.parse(slot['slot'].split(':')[0]);
+                                  int startHour = int.parse(controller.selectedStart.value!.split(':')[0]);
+                                  int endHour = int.parse(controller.selectedEnd.value!.split(':')[0]);
+                                  isSelected = currentHour >= startHour && currentHour <= endHour;
+                                }
+                              }
+
+                              return GestureDetector(
+                                onTap: isAvailable
+                                    ? () => controller.selectSlot(date, slot['slot'])
+                                    : null,
+                                child: Container(
+                                  margin: EdgeInsets.all(4),
+                                  padding: EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? Colors.blue
+                                        : isAvailable
+                                            ? AppTheme.success.withOpacity(0.4)
+                                            : AppTheme.textGrey,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      slot['slot'],
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isSelected ? Colors.white : Colors.black,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
+                              );
+                            });
                           },
                         ),
                         if (date == controller.selectedDate.value)

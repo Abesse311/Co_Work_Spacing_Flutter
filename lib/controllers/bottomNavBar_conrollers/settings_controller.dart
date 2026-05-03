@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/views/Settings_Pages/Profile_Settings_Screen.dart';
 import 'package:flutter_projet_tutore/views/auth/SignIn.dart';
@@ -100,4 +101,5 @@ class SettingsController extends GetxController {
     await prefs.remove('user_id');
     Get.offAll(() => LoginScreen());
   }
+
 }

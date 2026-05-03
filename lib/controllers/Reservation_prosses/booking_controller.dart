@@ -63,7 +63,18 @@ class BookingController extends GetxController {
       selectedStart.value = slot;
       selectedEnd.value = null;
     } else if (selectedStart.value != null && selectedEnd.value == null) {
-      selectedEnd.value = slot;
+      int startHour = int.parse(selectedStart.value!.split(':')[0]);
+      int currentHour = int.parse(slot.split(':')[0]);
+
+      if (currentHour < startHour) {
+        selectedEnd.value = selectedStart.value;
+        selectedStart.value = slot;
+      } else if (currentHour == startHour) {
+        selectedStart.value = null;
+        selectedDate.value = null;
+      } else {
+        selectedEnd.value = slot;
+      }
     } else {
       selectedStart.value = slot;
       selectedEnd.value = null;

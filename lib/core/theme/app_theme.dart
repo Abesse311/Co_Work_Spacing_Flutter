@@ -153,10 +153,17 @@ class AppTheme {
 
       ////////////////////////// InputDecoration
       
-      inputDecorationTheme: const InputDecorationTheme(
-        border: InputBorder.none,
+      inputDecorationTheme: InputDecorationTheme(
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.primary, width: 2),
+        ),
         hintStyle: TextStyle(color: Colors.black54),
-        contentPadding: EdgeInsets.symmetric(vertical: 16),
+        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       ),
 
       ////////////////////////// BottomNavigationBar

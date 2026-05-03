@@ -11,7 +11,10 @@ class ReservationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ReservationsController controller = Get.put(ReservationsController());
+    final ReservationsController controller = Get.put(ReservationsController(),permanent: false); 
+
+    controller.fetchReservations();
+
 
     return Scaffold(
       appBar: AppBar(
@@ -31,66 +34,89 @@ class ReservationsScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final Reservation item = controller.reservations[index];
                       return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
+                        margin: const EdgeInsets.only(bottom: 24),
                         decoration: AppTheme.cardDecoration,
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             ClipRRect(
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(12),
-                                bottomLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
                               ),
                               child: item.image.startsWith("data:image")
                                   ? Image.memory(
                                       base64Decode(item.image.split(',').last),
-                                      width: 120,
-                                      height: 70,
+                                      height: 150,
+                                      width: double.infinity,
                                       fit: BoxFit.cover,
                                     )
                                   : Image.asset(
                                       "img/default_room.jpg",
-                                      width: 120,
-                                      height: 70,
+                                      height: 150,
+                                      width: double.infinity,
                                       fit: BoxFit.cover,
                                     ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    item.title,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.title,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              item.subtitle,
+                                              style: TextStyle(
+                                                color: AppTheme.textSecondary,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: item.status == "Confirmed"
+                                              ? AppTheme.success.withOpacity(0.1)
+                                              : AppTheme.errorLight.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          item.status,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: item.status == "Confirmed"
+                                                ? AppTheme.success
+                                                : AppTheme.errorLight,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    item.subtitle,
-                                    style: TextStyle(
-                                      color: AppTheme.textSecondary,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 12),
                                   Text(
                                     "${item.price} DZD",
                                     style: const TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 16,
                                       color: AppTheme.primary,
                                       fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    item.status,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: item.status == "Confirmed"
-                                          ? AppTheme.success
-                                          : AppTheme.errorLight,
                                     ),
                                   ),
                                 ],

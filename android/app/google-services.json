@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "346190834272",
+    "project_id": "co-working-space-2b868",
+    "storage_bucket": "co-working-space-2b868.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346190834272:android:69aaa9a5735ef39a3cb105",
+        "android_client_info": {
+          "package_name": "com.example.flutter_projet_tutore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346190834272-k0esd9cjifplvdpkr9hjtqlou4hs6932.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flutter_projet_tutore",
+            "certificate_hash": "8b67eeec081d3b7695ae9a96aff303b26b4deb34"
+          }
+        },
+        {
+          "client_id": "346190834272-ck4o3f8noh9r4aabubi4djdmk6jkci01.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5XJbazALjhdTs5SRq5BD6rITnyEYbJNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346190834272-ck4o3f8noh9r4aabubi4djdmk6jkci01.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

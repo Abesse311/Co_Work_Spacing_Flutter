@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/balance_controller.dart';
 import 'package:get/get.dart';
-import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class BalanceScreen extends StatelessWidget {
   const BalanceScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final BalanceController controller = Get.put(BalanceController());
+    final BalanceController controller = Get.put(
+      BalanceController(),
+      permanent: false,
+    );
+
+    // يستدعي fetchUserData في كل مرة تُفتح الصفحة
+    controller.fetchUserData();
 
     return Obx(
       () => Scaffold(
         appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 46, 104, 69),
+          elevation: 0,
           title: Row(
             children: [
-              const Icon(Icons.person, size: 36, color: Colors.white),
-              const SizedBox(width: 12),
+               Icon(Icons.person, size: 36, color: Colors.white),
+               SizedBox(width: 12),
               Text(
                 controller.currentUser.value?.name ?? 'Loading...',
-                style: const TextStyle(
+                style:  TextStyle(
                   color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -29,27 +36,28 @@ class BalanceScreen extends StatelessWidget {
           ),
         ),
         body: controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
+            ?  Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
+                padding:  EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
+                      padding:  EdgeInsets.symmetric(
                         vertical: 40,
                         horizontal: 25,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary,
+                        color:  Color.fromARGB(255, 46, 104, 69),
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.primary.withOpacity(0.3),
+                            color:  Color.fromARGB(255, 46, 104, 69)
+                                .withOpacity(0.3),
                             spreadRadius: 2,
                             blurRadius: 8,
-                            offset: const Offset(0, 4),
+                            offset:  Offset(0, 4),
                           ),
                         ],
                       ),
@@ -57,13 +65,13 @@ class BalanceScreen extends StatelessWidget {
                         children: [
                           Text(
                             '${controller.currentUser.value?.balance.toStringAsFixed(2) ?? '0.00'} DZD',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                           SizedBox(height: 8),
                           Text(
                             'Current Balance',
                             style: TextStyle(
@@ -76,19 +84,19 @@ class BalanceScreen extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
+                      padding:  EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 16,
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                           Icon(
                             Icons.info_outline,
                             size: 20,
-                            color: AppTheme.primary,
+                            color: Color.fromARGB(255, 46, 104, 69),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
+                           SizedBox(width: 8),
+                           Text(
                             'To charge the Balance',
                             style: TextStyle(
                               fontSize: 20,
@@ -101,17 +109,17 @@ class BalanceScreen extends StatelessWidget {
                     ),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(20),
+                      padding:  EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppTheme.border),
+                        border: Border.all(color: Colors.grey.shade200),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.1),
                             spreadRadius: 1,
                             blurRadius: 10,
-                            offset: const Offset(0, 1),
+                            offset:  Offset(0, 1),
                           ),
                         ],
                       ),
@@ -120,7 +128,7 @@ class BalanceScreen extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                               Text(
                                 'Clé 86',
                                 style: TextStyle(
                                   fontSize: 20,
@@ -131,7 +139,7 @@ class BalanceScreen extends StatelessWidget {
                               Image.asset('icons/algerie_poste.jpg', height: 60),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                           SizedBox(height: 20),
                           _buildInfoRow('Compte', '00xxxxxxxx'),
                           _buildInfoRow('Nom', 'CHARGE'),
                           _buildInfoRow('Prénom', 'DZ'),
@@ -141,20 +149,27 @@ class BalanceScreen extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding:  EdgeInsets.all(20),
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: AppTheme.infoContainerDecoration,
+                        padding:  EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color:  Color.fromARGB(255, 243, 246, 244),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color:  Color.fromARGB(255, 46, 104, 69)
+                                .withOpacity(0.3),
+                          ),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Row(
+                             Row(
                               children: [
                                 Icon(
                                   Icons.info_outline,
                                   size: 20,
-                                  color: AppTheme.error,
+                                  color: Color.fromARGB(255, 170, 34, 19),
                                 ),
                                 SizedBox(width: 8),
                                 Text(
@@ -162,12 +177,12 @@ class BalanceScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: AppTheme.error,
+                                    color: Color.fromARGB(255, 170, 34, 19),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
+                             SizedBox(height: 12),
                             Text.rich(
                               TextSpan(
                                 style: TextStyle(
@@ -175,7 +190,7 @@ class BalanceScreen extends StatelessWidget {
                                   height: 1.5,
                                   color: Colors.grey[800],
                                 ),
-                                children: const [
+                                children:  [
                                   TextSpan(
                                     text:
                                         'Send the amount of money you want to charge in the application to this postal account, then send the payment receipt to this email ',
@@ -200,13 +215,13 @@ class BalanceScreen extends StatelessWidget {
 
   Widget _buildInfoRow(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding:  EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 16,
               color: Colors.black54,
               fontWeight: FontWeight.w500,
@@ -214,7 +229,7 @@ class BalanceScreen extends StatelessWidget {
           ),
           Text(
             value,
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 16,
               color: Colors.black87,
               fontWeight: FontWeight.w500,

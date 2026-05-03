@@ -36,6 +36,10 @@ dependencies:
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.2.2
   get: ^4.7.3
+  firebase_core: ^4.7.0
+  flutter_svg: ^2.2.4
+  firebase_auth: ^6.4.0
+  google_sign_in: ^6.2.1
 
 dev_dependencies:
   flutter_test:

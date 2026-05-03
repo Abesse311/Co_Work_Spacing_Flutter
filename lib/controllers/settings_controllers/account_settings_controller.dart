@@ -78,7 +78,7 @@ class ProfileSettingsController extends GetxController {
 
     try {
       final response = await http.put(
-        Uri.parse('https://ae3b-129-45-96-86.ngrok-free.app/users/$userId'),
+        Uri.parse('${ngrok_url}/users/$userId'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({field: value}),
       );
