@@ -1,270 +1,139 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/principale.dart';
-import 'package:flutter_projet_tutore/views/auth/verifyScreen.dart';
+import 'package:flutter_projet_tutore/services/auth_service.dart';
+import 'package:flutter_projet_tutore/views/auth/email_verification_screen.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/principale_ofThe_Buttom.dart';
 
 class Auth_SignIn_Controller extends GetxController {
-  /////////////////// controllers
+  // ── Controllers & state ───────────────────────────────────────────────────
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final obscureText = true.obs;
+  final isLoading = false.obs;
 
+  /// Secure storage instance — JWT is persisted here after login.
+  static const _storage = FlutterSecureStorage();
+
+  /// Key used to store / retrieve the JWT token.
+  static const _tokenKey = 'auth_token';
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
   @override
-  /////////////////// function: clear the inputs
   void onClose() {
     emailController.dispose();
     passwordController.dispose();
     super.onClose();
   }
 
-  /////////////////// UI-function: password textfield
-  void toggleObscure() {
-    obscureText.value = !obscureText.value;
-  }
+  // ── UI helpers ─────────────────────────────────────────────────────────────
+  void toggleObscure() => obscureText.value = !obscureText.value;
 
-  /////////////////// FORGOT PASSWORD function
-  Future<void> forgotPassword() async {
+  // ── FORGOT PASSWORD ────────────────────────────────────────────────────────
+  /// Placeholder — implement reset-password endpoint later.
+  void forgotPassword() {
     final email = emailController.text.trim();
 
     if (email.isEmpty) {
-      Get.snackbar(
-        'Empty Field',
-        'Please enter your email address first.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _snack('Empty Field', 'Please enter your email address first.');
       return;
     }
 
     if (!GetUtils.isEmail(email)) {
-      Get.snackbar(
-        'Invalid Email',
-        'Please enter a valid email address.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _snack('Invalid Email', 'Please enter a valid email address.');
       return;
     }
 
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      Get.snackbar(
-        'Email Sent',
-        'A password reset link has been sent to $email.',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 4),
-      );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        Get.snackbar(
-          'Not Found',
-          'No account found for this email address.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'invalid-email') {
-        Get.snackbar(
-          'Invalid Email',
-          'The email address is badly formatted.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'too-many-requests') {
-        Get.snackbar(
-          'Too Many Requests',
-          'Please wait before requesting another reset email.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'network-request-failed') {
-        Get.snackbar(
-          'Network Error',
-          'Check your internet connection and try again.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          e.message ?? 'An error occurred. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    }
+    // TODO: call POST /auth/local/forgot-password once the endpoint is ready.
+    _snack(
+      'Coming soon',
+      'Password reset is not yet available. Please contact support.',
+      isError: false,
+    );
   }
 
-  /////////////////// LOG INUser function
-  // Future<void> loginUser() async {
-  //   if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-  //     Get.snackbar(
-  //       'Champs vides',
-  //       emailController.text.isEmpty
-  //           ? 'Veuillez remplir le champ Email.'
-  //           : 'Veuillez remplir le champ Mot de passe.',
-  //       snackPosition: SnackPosition.BOTTOM,
-  //       margin: EdgeInsets.only(bottom: 15),
-  //     );
-  //     return;
-  //   }
-
-  //   final url = Uri.parse('${ngrok_url}/login');
-  //   final response = await http.post(
-  //     url,
-  //     headers: {'Content-Type': 'application/json'},
-  //     body: jsonEncode({
-  //       "email": emailController.text,
-  //       "password": passwordController.text,
-  //     }),
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     final responseData = jsonDecode(response.body);
-  //     final prefs = await SharedPreferences.getInstance();
-  //     await prefs.setString('user_email', emailController.text);
-  //     if (responseData['id'] != null) {
-  //       await prefs.setInt('user_id', responseData['id']);
-  //     }
-
-  //     Get.snackbar(
-  //       'Succès',
-  //       'Connexion réussie !',
-  //       snackPosition: SnackPosition.BOTTOM,
-  //     );
-  //     Get.offAll(() => MyWidget());
-  //   } else {
-  //     Get.snackbar(
-  //       'Erreur',
-  //       jsonDecode(response.body)['error'],
-  //       snackPosition: SnackPosition.BOTTOM,
-  //     );
-  //   }
-  // }
-
+  // ── SIGN IN ────────────────────────────────────────────────────────────────
+  /// POST /auth/local/login
+  /// • Success + verified  → store JWT → Home
+  /// • Email not verified  → EmailVerificationScreen (email passed via Get.arguments)
+  /// • Other error         → snackbar
   Future<void> authEmail_Password() async {
-    // ── Basic validation ──────────────────────────────────────────────────────
-    if (emailController.text.trim().isEmpty ||
-        passwordController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Empty Fields',
-        'Please enter your email and password.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    // ── Validation ────────────────────────────────────────────────────────
+    if (email.isEmpty || password.isEmpty) {
+      _snack('Empty Fields', 'Please enter your email and password.');
       return;
     }
 
-    try {
-      // ── Authenticate with Firebase ────────────────────────────────────────
-      final credential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text,
+    if (!GetUtils.isEmail(email)) {
+      _snack('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    isLoading.value = true;
+
+    final result = await AuthService.login(email: email, password: password);
+
+    isLoading.value = false;
+
+    // ── Handle response ───────────────────────────────────────────────────
+    if (result['success'] == true) {
+      // ✅ Credentials valid & email verified → store token → Home
+      final token = result['token'] as String? ?? '';
+      if (token.isNotEmpty) {
+        await _storage.write(key: _tokenKey, value: token);
+      }
+      _snack('Welcome back! 🎉', 'You are now signed in.', isError: false);
+      Get.offAll(() => const MyWidget());
+    } else if (result['emailNotVerified'] == true) {
+      // ❌ Email not verified → reuse existing EmailVerificationScreen
+      // Pass the email as an argument so the screen can display / use it.
+      _snack(
+        'Email Not Verified',
+        'Please verify your email before signing in.',
       );
-
-      // ── Force-reload to get the latest emailVerified flag ─────────────────
-      await credential.user?.reload();
-      final User? user = FirebaseAuth.instance.currentUser;
-
-      if (user != null && user.emailVerified) {
-        // ✅ Verified → Home
-        Get.offAll(() => MyWidget());
-      } else {
-        // ❌ Not verified → blocking Verify Email screen
-        Get.offAll(() => const VerifyEmailScreen());
-      }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        Get.snackbar(
-          'Error',
-          'No account found for this email.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'wrong-password') {
-        Get.snackbar(
-          'Error',
-          'Incorrect password.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'invalid-credential') {
-        Get.snackbar(
-          'Error',
-          'Incorrect email or password.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'invalid-email') {
-        Get.snackbar(
-          'Error',
-          'The email address is badly formatted.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'user-disabled') {
-        Get.snackbar(
-          'Error',
-          'This account has been disabled.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'too-many-requests') {
-        Get.snackbar(
-          'Too Many Requests',
-          'Too many attempts. Please try again later.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'network-request-failed') {
-        Get.snackbar(
-          'Network Error',
-          'Check your internet connection and try again.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          e.message ?? 'An error occurred.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+      Get.to(
+        () => const EmailVerificationScreen(),
+        arguments: email,
+      );
+    } else {
+      // ❌ Wrong credentials or server error
+      _snack('Login Failed', result['message'] ?? 'An error occurred. Please try again.');
     }
   }
 
-  /////////////////// GOOGLE SIGN-IN function
-  Future<void> signInWithGoogle() async {
-    try {
-      // Trigger the Google Sign-In flow
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  // ── GOOGLE SIGN-IN (not implemented yet) ──────────────────────────────────
+  /// Google Auth is not yet implemented as per project requirements.
+  void signInWithGoogle() {
+    _snack(
+      'Coming soon',
+      'Google Sign-In is not yet available.',
+      isError: false,
+    );
+  }
 
-      // User cancelled the sign-in dialog
-      if (googleUser == null) return;
+  // ── Static helpers ─────────────────────────────────────────────────────────
+  /// Reads the stored JWT token (useful for authenticated API calls).
+  static Future<String?> getToken() => _storage.read(key: _tokenKey);
 
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+  /// Clears the JWT token (call on logout).
+  static Future<void> clearToken() => _storage.delete(key: _tokenKey);
 
-      // Create a Firebase credential
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Sign in to Firebase with the Google credential
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // ── Force-reload to get the latest emailVerified flag ─────────────────
-      await userCredential.user?.reload();
-      final User? user = FirebaseAuth.instance.currentUser;
-
-      // Google accounts are always verified, but we guard anyway
-      if (user != null && user.emailVerified) {
-        Get.offAll(() => MyWidget());
-      } else {
-        Get.offAll(() => const VerifyEmailScreen());
-      }
-    } on FirebaseAuthException catch (e) {
-      Get.snackbar(
-        'Google Sign-In Error',
-        e.message ?? 'An error occurred during Google sign-in.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (e) {
-      Get.snackbar(
-        'Google Sign-In Error',
-        'An unexpected error occurred. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+  // ── Private ────────────────────────────────────────────────────────────────
+  void _snack(String title, String message, {bool isError = true}) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 4),
+      backgroundColor: isError
+          ? const Color(0xFFAA2213).withOpacity(0.9)
+          : const Color(0xFF2E6845).withOpacity(0.9),
+      colorText: const Color(0xFFFFFFFF),
+      margin: const EdgeInsets.all(12),
+      borderRadius: 12,
+    );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/principale.dart';
+import 'package:flutter_projet_tutore/views/auth/SignIn_screen.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/principale_ofThe_Buttom.dart';
 import 'package:get/get.dart';
-import 'package:flutter_projet_tutore/views/auth/sginUp.dart';
+import 'package:flutter_projet_tutore/views/auth/sginUp_screen.dart';
 
 class VerifyEmailController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -24,10 +24,10 @@ class VerifyEmailController extends GetxController {
       final User? refreshedUser = _auth.currentUser;
 
       if (refreshedUser != null && refreshedUser.emailVerified) {
-        // ✅ Email verified → go to Home screen
+        //  Email verified  to Home screen
         Get.offAll(() => LoginScreen());
       } else {
-        // ❌ Not yet verified → stay and inform the user
+        //  Not yet verified → stay and inform the user
         Get.snackbar(
           'Not Verified',
           'Your email is not verified yet. Please check your inbox.',

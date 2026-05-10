@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/balance_controller.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/settings_controller.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn.dart';
+import 'package:flutter_projet_tutore/views/auth/SignIn_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';

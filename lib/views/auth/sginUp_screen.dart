@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignUp_controller.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn.dart';
+import 'package:flutter_projet_tutore/views/auth/SignIn_screen.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
@@ -35,12 +36,12 @@ class RegisterScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Register',
-                    style: Theme.of(context).textTheme.headlineLarge,
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: Colors.black,fontFamily: "roboto"),
                   ),
                   //  SizedBox(height: 4),
                   Text(
                     'Please register to log in.',
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: Theme.of(context).textTheme.labelLarge, 
                   ),
                   ////////////////////////////////////////////////////////
                   
@@ -113,6 +114,11 @@ class RegisterScreen extends StatelessWidget {
                   decoration: AppTheme.inputDecoration,
                   child: TextField(
                     controller: controller.phoneController,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
                     decoration: InputDecoration(
                       hintText: 'phone number',
                       prefixIcon: Icon(
@@ -126,19 +132,28 @@ class RegisterScreen extends StatelessWidget {
                    SizedBox(height: 24),
 
                   ///////////////////// Sign Up Button
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: controller.registerEmail_password,
-                        child:  Text(
-                          'Sign up',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                  Obx(
+                    () => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: controller.isLoading.value
+                              ? null
+                              : controller.registerEmail_password,
+                          child: controller.isLoading.value
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              :  Text(
+                                  'Sign up',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
                         ),
                       ),
                     ),
@@ -146,7 +161,6 @@ class RegisterScreen extends StatelessWidget {
                   
                    SizedBox(height: 24),
 
-                  ///////////////////// google button 
                   
 
                    ////////////////////////////////////////////////////////
@@ -155,18 +169,15 @@ class RegisterScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                        Text(
-                        'already have account? ',
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
+                        'already have an account? ',
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       GestureDetector(
                         onTap: () => Get.to(() => LoginScreen()),
                         child:  Text(
                           'Log in',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppTheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,)
                         ),
                       ),
                     ],

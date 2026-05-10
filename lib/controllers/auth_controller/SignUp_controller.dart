@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/views/auth/verifyScreen.dart';
 import 'package:get/get.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_projet_tutore/services/auth_service.dart';
+import 'package:flutter_projet_tutore/views/auth/email_verification_screen.dart';
 
 class Auth_SignUp_Controller extends GetxController {
-  // Register
+  // ── Form controllers ───────────────────────────────────────────────────────
   final nameController = TextEditingController();
   final registerEmailController = TextEditingController();
   final registerPasswordController = TextEditingController();
   final phoneController = TextEditingController();
 
+  // ── Observable state ───────────────────────────────────────────────────────
   final obscureText = true.obs;
+  final isLoading = false.obs;
 
   @override
-  /////////////////// Clear the inputs
   void onClose() {
     nameController.dispose();
     registerEmailController.dispose();
@@ -22,147 +23,71 @@ class Auth_SignUp_Controller extends GetxController {
     super.onClose();
   }
 
+  // ── Actions ────────────────────────────────────────────────────────────────
 
-
-  void registerEmail_password() async {
-    // ── Basic validation ────────────────────────────────────────────────────
-    final name = nameController.text.trim();
+  /// Validates all fields, calls POST /auth/local/signup,
+  /// then navigates to the Email Verification screen on success.
+  Future<void> registerEmail_password() async {
+    final username = nameController.text.trim();
     final email = registerEmailController.text.trim();
     final password = registerPasswordController.text.trim();
+    final phone = phoneController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
-      Get.snackbar(
-        'Empty Fields',
-        'Please fill in all required fields.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+    // ── Local validation ───────────────────────────────────────────────────
+    if (username.isEmpty || email.isEmpty || password.isEmpty || phone.isEmpty) {
+      _snack('Empty Fields', 'Please fill in all required fields.');
       return;
     }
 
     if (!GetUtils.isEmail(email)) {
-      Get.snackbar(
-        'Invalid Email',
-        'Please enter a valid email address.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _snack('Invalid Email', 'Please enter a valid email address.');
       return;
     }
 
     if (password.length < 6) {
-      Get.snackbar(
-        'Weak Password',
-        'Password must be at least 6 characters.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _snack('Weak Password', 'Password must be at least 6 characters.');
       return;
     }
 
-    // ── Firebase account creation ───────────────────────────────────────────
-    try {
-      final credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
+    // ── API call ───────────────────────────────────────────────────────────
+    isLoading.value = true;
 
-      // Update display name
-      await credential.user?.updateDisplayName(name);
+    final result = await AuthService.signup(
+      username: username,
+      email: email,
+      password: password,
+      phoneNumber: phone,
+    );
 
-      // Send verification email immediately — do NOT go to Home yet
-      await credential.user?.sendEmailVerification();
+    isLoading.value = false;
 
-      // Route to the blocking Verify Email screen
-      Get.offAll(() => const VerifyEmailScreen());
-
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        Get.snackbar(
-          'Weak Password',
-          'The password provided is too weak.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'email-already-in-use') {
-        Get.snackbar(
-          'Error',
-          'An account already exists for that email.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'invalid-email') {
-        Get.snackbar(
-          'Invalid Email',
-          'The email address is badly formatted.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else if (e.code == 'too-many-requests') {
-        Get.snackbar(
-          'Too Many Requests',
-          'Please wait a moment before trying again.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          e.message ?? 'An error occurred during registration.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'An unexpected error occurred. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
+    if (result['success'] == true) {
+      // Pass the registered email so the verification screen can use it
+      Get.to(
+        () => const EmailVerificationScreen(),
+        arguments: email,
       );
+    } else {
+      _snack('Sign Up Failed', result['message']);
     }
   }
 
+  /// Toggles password visibility.
+  void toggleObscure() => obscureText.value = !obscureText.value;
 
-  /////////////////// registerUser function
-  
-  // Future<void> registerUser() async {
-  //   if (nameController.text.isEmpty ||
-  //       phoneController.text.isEmpty ||
-  //       registerPasswordController.text.isEmpty ||
-  //       registerEmailController.text.isEmpty) {
-  //     Get.snackbar(
-  //       'Champs vides',
-  //       'Veuillez remplir le champ Vide',
-  //       snackPosition: SnackPosition.BOTTOM,
-  //     );
-  //     return;
-  //   }
-
-  //   final url = Uri.parse('${ngrok_url}/users');
-  //   final response = await http.post(
-  //     url,
-  //     headers: {'Content-Type': 'application/json'},
-  //     body: jsonEncode({
-  //       "name": nameController.text,
-  //       "email": registerEmailController.text,
-  //       "password": registerPasswordController.text,
-  //       "number": int.tryParse(phoneController.text) ?? 0,
-  //     }),
-  //   );
-
-  //   if (response.statusCode == 201) {
-  //     Get.snackbar(
-  //       'Succès',
-  //       'Inscription réussie !',
-  //       snackPosition: SnackPosition.BOTTOM,
-  //     );
-  //     Get.to(() => LoginScreen());
-  //   } else {
-  //     Get.snackbar(
-  //       'Erreur',
-  //       jsonDecode(response.body)['error'],
-  //       snackPosition: SnackPosition.BOTTOM,
-  //     );
-  //   }
-  // }
-
-
-
-  /////////////////// password input function
-  void toggleObscure() {
-    obscureText.value = !obscureText.value;
+  // ── Helper ─────────────────────────────────────────────────────────────────
+  void _snack(String title, String message, {bool isError = true}) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 4),
+      backgroundColor: isError
+          ? const Color(0xFFAA2213).withOpacity(0.9)
+          : const Color(0xFF2E6845).withOpacity(0.9),
+      colorText: const Color(0xFFFFFFFF),
+      margin: const EdgeInsets.all(12),
+      borderRadius: 12,
+    );
   }
 }

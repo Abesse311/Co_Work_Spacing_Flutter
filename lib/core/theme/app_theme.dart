@@ -99,42 +99,56 @@ class AppTheme {
       ////////////////////////// TextTeheme
       
       textTheme: const TextTheme(
+        ///////////////=############### signin/signup/ homePage////////////////
         headlineLarge: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-        headlineMedium: TextStyle(
           fontSize: 24,
+          fontWeight: FontWeight.bold,
           color: Colors.white,
+          fontFamily: "Relicta"
         ),
+
+        ///////////////////////////////
+        
         headlineSmall: TextStyle(
-          fontSize: 22,
-          color: primary,
+          fontSize: 18,
+          color: Colors.white,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
         ),
+        ///////////////=############### Suggested for you (homePage)////////////////
+        
         titleLarge: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-        titleMedium: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: Colors.black,
         ),
+        ///////////////=############### For the elevated buttons <<<=====
+        
+        titleMedium: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          fontFamily: "Relicta"
+        ),
+        ///////////////=############### have an account
+        
         bodyLarge: TextStyle(
           fontSize: 16,
           color: Colors.black,
+          fontFamily: "roboto"
         ),
+        ///////////////////////////////
+        
         bodyMedium: TextStyle(
           fontSize: 14,
-          color: Colors.black87,
+          color: Color(0xFF757575),  // 0xCCFFFFFF
         ),
+        //////////////////=############### forgot password 
+        
         labelLarge: TextStyle(
           fontSize: 16,
           color: Colors.black54,
+          fontFamily: "exo"
         ),
       ),
 

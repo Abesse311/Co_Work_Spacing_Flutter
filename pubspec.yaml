@@ -40,11 +40,13 @@ dependencies:
   flutter_svg: ^2.2.4
   firebase_auth: ^6.4.0
   google_sign_in: ^6.2.1
+  lottie: ^3.3.3
+  http: ^1.2.1
+  flutter_secure_storage: ^9.2.2 #/////////////////////////////
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  http: ^1.2.1 
   flutter_launcher_icons: ^0.14.3
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -89,10 +91,18 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+    - family: exo
+      fonts:
+        - asset: fonts/exo.ttf
+
+    - family: Relicta
+      fonts:
+        - asset: fonts/Relicta.otf
+        
+    - family: roboto
+      fonts:
+        - asset: fonts/roboto.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

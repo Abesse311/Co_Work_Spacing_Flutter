@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignIn_controller.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:flutter_projet_tutore/views/auth/sginUp.dart';
+import 'package:flutter_projet_tutore/views/auth/sginUp_screen.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -18,41 +18,42 @@ class LoginScreen extends StatelessWidget {
 
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start, 
-              children: [
-                //////////////// the image container 
-                Container(
-                  height: 220,
-                  decoration: BoxDecoration(
-                    color: AppTheme.backgroundBeige,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Image.asset('img/sgine.jpg', fit: BoxFit.contain),
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //////////////// the image container (no horizontal padding)
+              Container(
+                height: 220,
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundBeige,
                 ),
+                child: Center(
+                  child: SvgPicture.asset('img/neu.svg', fit: BoxFit.contain),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
                  SizedBox(height: 24),
-                 ////////////////////////////////////////////////////////
                 
                  Text(
                   'Login',
-                  style: Theme.of(context).textTheme.headlineLarge,
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: Colors.black,fontFamily: "roboto"),
                 ),
 
-                //  SizedBox(height: 8),
 
                  Text(
                   'Please log in to continue.',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
 
-                 ////////////////////////////////////////////////////////
 
                  SizedBox(height: 18),
+
+                 //  TextFields ________________________________________________________________________________________________________
 
                  //////////////////////////// Email TextFiled 
                 Container(
@@ -106,26 +107,38 @@ class LoginScreen extends StatelessWidget {
                     onPressed: controller.forgotPassword,
                     child: Text(
                       'Forgot password?',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primary,
-                      ),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 14,fontWeight: FontWeight.w600,
+                        color: AppTheme.primary,)
                     ),
                   ),
                 ),
 
-                /////////////////////////////// LOG IN BUTTON
+                 //  buttonns ________________________________________________________________________________________________________
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: controller.authEmail_Password,
-                      child:  Text(
-                        'Log in',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                 /////////////////////////////// Login button 
+
+                Obx(
+                  () => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : controller.authEmail_Password,
+                        child: controller.isLoading.value
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            :  Text(
+                                'Log in',
+                                style: Theme.of(context).textTheme.titleMedium
+                              ),
                       ),
                     ),
                   ),
@@ -159,7 +172,7 @@ class LoginScreen extends StatelessWidget {
                           SizedBox(width: 8),
                           Text(
                             'Continue with Google',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black),
                           ),
                         ],
                       ),
@@ -173,25 +186,25 @@ class LoginScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                      Text(
-                      'already have account? ',
-                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                      "Don't have an account? ",
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     GestureDetector(
                       onTap: () => Get.to(() => RegisterScreen()),
-                      child: Text(
+                      child:  Text(
                         'Register',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primary,
-                        ),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,)
+                        
                       ),
                     ),
                   ],
                 ),
 
-              ],
+                ],
+              ),
             ),
+            ],
           ),
         ),
       ),
