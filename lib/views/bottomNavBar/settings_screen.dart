@@ -96,7 +96,7 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.logout, color: AppTheme.errorLight),
             title: const Text(
-              'Disconnect',
+              'Log out ',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,

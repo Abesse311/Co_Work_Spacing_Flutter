@@ -121,32 +121,19 @@ class EmailVerificationScreen extends StatelessWidget {
               const SizedBox(height: 36),
 
               // ── Confirm button ─────────────────────────────────────────────
-              Obx(
-                () => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : controller.confirmEmail,
-                      child: controller.isLoading.value
-                          ? const SizedBox(
-                              height: 22,
-                              width: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text(
-                              'Verify Email',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: controller.confirmEmail,
+                    child: const Text(
+                      'Verify Email',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -175,9 +162,9 @@ class EmailVerificationScreen extends StatelessWidget {
               TextButton(
                 onPressed: () => Get.back(),
                 child: const Text(
-                  'Go back & try again',
+                  'Go back and try again',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 16,
                     color: AppTheme.primary,
                     fontWeight: FontWeight.w600,
                   ),

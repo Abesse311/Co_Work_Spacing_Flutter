@@ -111,6 +111,11 @@ class AuthService {
         parsed['emailNotVerified'] = true;
       }
 
+      // 401 = wrong email or password
+      if (response.statusCode == 401) {
+        parsed['wrongCredentials'] = true;
+      }
+
       return parsed;
     } on TimeoutException {
       return _timeoutError();
@@ -145,6 +150,9 @@ class AuthService {
       // Forward any token the server might return
       if (body.containsKey('access_token')) 'token': body['access_token'],
       if (body.containsKey('token')) 'token': body['token'],
+      // Forward user_id if the server returns it
+      if (body.containsKey('user_id')) 'user_id': body['user_id'],
+      if (body.containsKey('id')) 'user_id': body['id'],
     };
   }
 

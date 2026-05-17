@@ -7,10 +7,7 @@ class BalanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BalanceController controller = Get.put(
-      BalanceController(),
-      permanent: false,
-    );
+    final BalanceController controller = Get.put(BalanceController(),permanent: false,);
 
     // يستدعي fetchUserData في كل مرة تُفتح الصفحة
     controller.fetchUserData();

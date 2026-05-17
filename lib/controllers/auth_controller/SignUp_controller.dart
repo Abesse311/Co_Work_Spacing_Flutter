@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/services/auth_service.dart';
-import 'package:flutter_projet_tutore/views/auth/email_verification_screen.dart';
 
 class Auth_SignUp_Controller extends GetxController {
   // ── Form controllers ───────────────────────────────────────────────────────
@@ -44,7 +43,12 @@ class Auth_SignUp_Controller extends GetxController {
       return;
     }
 
-    if (password.length < 6) {
+    if (phone.length != 10) {
+      _snack('Invalid Phone Number', 'Phone number must be exactly 10 digits.');
+      return;
+    }
+
+    if (password.length < 8) {
       _snack('Weak Password', 'Password must be at least 6 characters.');
       return;
     }
@@ -62,13 +66,16 @@ class Auth_SignUp_Controller extends GetxController {
     isLoading.value = false;
 
     if (result['success'] == true) {
-      // Pass the registered email so the verification screen can use it
-      Get.to(
-        () => const EmailVerificationScreen(),
-        arguments: email,
-      );
+      // Clear all fields so they are empty if the user comes back later
+      nameController.clear();
+      registerEmailController.clear();
+      registerPasswordController.clear();
+      phoneController.clear();
+
+      // Navigate to email verification, passing the registered email
+      Get.toNamed('/verify-email', arguments: email);
     } else {
-      _snack('Sign Up Failed', result['message']);
+      _snack('Sign Up Failed', result['message']); // <<====
     }
   }
 

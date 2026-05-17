@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignUp_controller.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn_screen.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
@@ -132,28 +131,15 @@ class RegisterScreen extends StatelessWidget {
                    SizedBox(height: 24),
 
                   ///////////////////// Sign Up Button
-                  Obx(
-                    () => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: controller.isLoading.value
-                              ? null
-                              : controller.registerEmail_password,
-                          child: controller.isLoading.value
-                              ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              :  Text(
-                                  'Sign up',
-                                  style: Theme.of(context).textTheme.titleMedium,
-                                ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: controller.registerEmail_password,
+                        child: Text(
+                          'Sign up',
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
                     ),
@@ -173,7 +159,7 @@ class RegisterScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       GestureDetector(
-                        onTap: () => Get.to(() => LoginScreen()),
+                        onTap: () => Get.toNamed('/login'),
                         child:  Text(
                           'Log in',
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold,

@@ -1,14 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/views/Settings_Pages/Profile_Settings_Screen.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsController extends GetxController {
 
   void goToAccountSettings() {
-    Get.to(() => AccountSettingsScreen());
+    Get.toNamed('/settings/account');
   }
 
   void showNotificationsDialog() {
@@ -96,10 +95,15 @@ class SettingsController extends GetxController {
   }
 
   Future<void> logout() async {
+    // Clear the JWT so main.dart won't auto-login on next launch
+    const storage = FlutterSecureStorage();
+    await storage.delete(key: 'auth_token');
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_email');
     await prefs.remove('user_id');
-    Get.offAll(() => LoginScreen());
+
+    Get.offAllNamed('/login');
   }
 
 }

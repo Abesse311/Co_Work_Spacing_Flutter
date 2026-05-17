@@ -106,7 +106,7 @@ class RoomBookingPage extends StatelessWidget {
                     controller.selectedEnd.value != null
                 ? controller.confirmReservation
                 : null,
-            child: Text("Confirmer la réservation"),
+            child: Text("Confirmer booking"),
           ),
         ),
       ),

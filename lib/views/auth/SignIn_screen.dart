@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignIn_controller.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:flutter_projet_tutore/views/auth/sginUp_screen.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -10,7 +9,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Auth_SignIn_Controller controller = Get.put(Auth_SignIn_Controller());
+    final controller = Get.put(Auth_SignIn_Controller());
 
     return Scaffold(
 
@@ -117,28 +116,15 @@ class LoginScreen extends StatelessWidget {
 
                  /////////////////////////////// Login button 
 
-                Obx(
-                  () => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: controller.isLoading.value
-                            ? null
-                            : controller.authEmail_Password,
-                        child: controller.isLoading.value
-                            ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
-                            :  Text(
-                                'Log in',
-                                style: Theme.of(context).textTheme.titleMedium
-                              ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: controller.authEmail_Password,
+                      child: Text(
+                        'Log in',
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
                   ),
@@ -190,7 +176,7 @@ class LoginScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     GestureDetector(
-                      onTap: () => Get.to(() => RegisterScreen()),
+                      onTap: () => Get.toNamed('/register'),
                       child:  Text(
                         'Register',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold,

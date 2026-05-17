@@ -83,9 +83,9 @@ class BookingController extends GetxController {
 
   Future<void> confirmReservation() async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('user_id');
+    final userId = prefs.getString('user_id');
 
-    if (userId == null) {
+    if (userId == null || userId.isEmpty) {
       Get.snackbar('Erreur', 'Utilisateur non connecté');
       return;
     }
@@ -100,22 +100,22 @@ class BookingController extends GetxController {
 
     bool? confirmed = await Get.dialog<bool>(
       AlertDialog(
-        title: Text('Confirmer la réservation'),
+        title: Text('Confirm Reservation'),
         content: Text(
-          'Date : ${selectedDate.value}\n'
-          'De : ${selectedStart.value} à ${selectedEnd.value}\n'
-          'Nombre de créneaux : $slotCount\n'
-          'Montant total : $totalPrice DZD\n\n'
-          'Voulez-vous confirmer la réservation ?',
+          'Date: ${selectedDate.value}\n'
+          'From: ${selectedStart.value} to ${selectedEnd.value}\n'
+          'Number of slots: $slotCount\n'
+          'Total amount: $totalPrice DZD\n\n'
+          'Do you want to confirm this reservation?',
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: Text('Annuler'),
+            child: Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Get.back(result: true),
-            child: Text('Confirmer'),
+            child: Text('Confirm'),
           ),
         ],
       ),
@@ -127,7 +127,7 @@ class BookingController extends GetxController {
   }
 
   Future<void> _sendReservation(
-      int userId, int slotCount, double totalPrice) async {
+      String userId, int slotCount, double totalPrice) async {
     try {
       final response = await http.post(
         Uri.parse('${ngrok_url}/bookings'),
@@ -138,11 +138,11 @@ class BookingController extends GetxController {
           "date": selectedDate.value,
           "start_time": selectedStart.value,
           "slot_count": slotCount,
-          "total_price": totalPrice,
         }),
       );
+      print('🔍 POST /bookings → ${response.statusCode}: ${response.body}');
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar('Succès', 'Vous avez bien réservé !');
         fetchAvailability();
         selectedDate.value = null;
@@ -150,10 +150,10 @@ class BookingController extends GetxController {
         selectedEnd.value = null;
       } else {
         final resp = jsonDecode(response.body);
-        Get.snackbar('Erreur', resp['error'] ?? 'Erreur lors de la réservation');
+        Get.snackbar('Erreur', resp['detail'] ?? resp['error'] ?? 'Erreur lors de la réservation');
       }
     } catch (e) {
-      Get.snackbar('Erreur', 'Problème de connexion');
+      Get.snackbar('Erreur', 'Problème de connexion: $e');
     }
   }
 }

@@ -1,8 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn_screen.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/principale_ofThe_Buttom.dart';
 import 'package:get/get.dart';
-import 'package:flutter_projet_tutore/views/auth/sginUp_screen.dart';
 
 class VerifyEmailController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -15,7 +12,7 @@ class VerifyEmailController extends GetxController {
 
       if (user == null) {
         // No user session → send back to Sign Up
-        Get.offAll(() => const RegisterScreen());
+        Get.offAllNamed('/register');
         return;
       }
 
@@ -25,7 +22,7 @@ class VerifyEmailController extends GetxController {
 
       if (refreshedUser != null && refreshedUser.emailVerified) {
         //  Email verified  to Home screen
-        Get.offAll(() => LoginScreen());
+        Get.offAllNamed('/login');
       } else {
         //  Not yet verified → stay and inform the user
         Get.snackbar(
@@ -57,13 +54,13 @@ class VerifyEmailController extends GetxController {
       final User? user = _auth.currentUser;
 
       if (user == null) {
-        Get.offAll(() => const RegisterScreen());
+        Get.offAllNamed('/register');
         return;
       }
 
       if (user.emailVerified) {
         // Already verified, just proceed
-        Get.offAll(() => MyWidget());
+        Get.offAllNamed('/home');
         return;
       }
 
@@ -103,7 +100,7 @@ class VerifyEmailController extends GetxController {
   Future<void> logout() async {
     try {
       await _auth.signOut();
-      Get.offAll(() => const RegisterScreen());
+      Get.offAllNamed('/register');
     } catch (e) {
       Get.snackbar(
         'Error',

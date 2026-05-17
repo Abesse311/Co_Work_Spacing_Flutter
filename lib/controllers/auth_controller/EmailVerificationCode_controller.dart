@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/services/auth_service.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn_screen.dart';
 
 /// Controller for the Email Verification screen.
 ///
@@ -42,10 +41,10 @@ class EmailVerificationCodeController extends GetxController {
       return;
     }
 
-    if (email.value.isEmpty) {
-      _snack('Error', 'Email address is missing. Please sign up again.');
-      return;
-    }
+    // if (email.value.isEmpty) {
+    //   _snack('Error', 'Email address is missing. Please sign up again.');
+    //   return;
+    // }
 
     isLoading.value = true;
 
@@ -58,14 +57,17 @@ class EmailVerificationCodeController extends GetxController {
 
     if (result['success'] == true) {
       _snack(
-        'Email Verified 🎉',
+        'Email Verified ',
         'Your account is confirmed. Please sign in.',
         isError: false,
       );
       // Clear the entire back-stack → Sign In page
-      Get.offAll(() => const LoginScreen());
+      Get.offAllNamed('/login');
     } else {
-      _snack('Verification Failed', result['message']);
+      _snack(
+        'Wrong Code',
+        'The verification code you entered is incorrect. Please check your inbox and try again.',
+      );
     }
   }
 
