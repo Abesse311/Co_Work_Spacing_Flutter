@@ -9,7 +9,10 @@ class AccountSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProfileSettingsController controller =
-        Get.put(ProfileSettingsController());
+        Get.put(ProfileSettingsController()); 
+
+
+    
 
     return Scaffold(
       appBar: AppBar(

@@ -16,9 +16,10 @@ class ReservationsController extends GetxController {
   }
 
   Future<void> fetchReservations() async {
+    isLoading.value = true;
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('user_id');
-    if (userId == null) return;
+    final userId = prefs.getString('user_id');
+    if (userId == null || userId.isEmpty) return;
 
     try {
       final response = await http.get(

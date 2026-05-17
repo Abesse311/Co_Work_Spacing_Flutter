@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/balance_controller.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/settings_controller.dart';
+import 'package:flutter_projet_tutore/views/auth/SignIn_screen.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -10,15 +13,25 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SettingsController controller = Get.put(SettingsController());
-    final BalanceController balanceController = Get.put(BalanceController());
+    final BalanceController balanceController = Get.put(BalanceController()); 
+
+    balanceController.fetchUserData();
 
     return Scaffold(
       appBar: AppBar(
+        actions: [IconButton(onPressed: () async{
+          await GoogleSignIn().signOut(); // clears Google session → forces account picker next time
+          await FirebaseAuth.instance.signOut();
+          Get.offAll(() => LoginScreen());
+          }, icon: Icon(Icons.exit_to_app))],
         title: Text(
           'Account',
           style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
+
+
+
       body: ListView(
         children: [
           Padding(
@@ -83,7 +96,7 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.logout, color: AppTheme.errorLight),
             title: const Text(
-              'Disconnect',
+              'Log out ',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -92,6 +105,8 @@ class SettingsScreen extends StatelessWidget {
             ),
             onTap: controller.showLogoutDialog,
           ),
+
+
         ],
       ),
     );

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_projet_tutore/models/location_model.dart';
-import 'package:flutter_projet_tutore/views/La_Reservation_prosses/rooms.dart';
 import 'package:flutter_projet_tutore/variables.dart';
 
 class LocationsController extends GetxController {
@@ -36,11 +35,12 @@ class LocationsController extends GetxController {
   }
 
   void goToRooms(LocationData location) {
-    Get.to(
-      () => RoomsScreen(
-        locationId: location.id,
-        locationName: location.name,
-      ),
+    Get.toNamed(
+      '/rooms',
+      arguments: {
+        'locationId': location.id,
+        'locationName': location.name,
+      },
     );
   }
 }

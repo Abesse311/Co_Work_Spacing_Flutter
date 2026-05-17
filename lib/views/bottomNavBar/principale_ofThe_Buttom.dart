@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/nav_controller.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/settings.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/settings_screen.dart';
 import 'package:get/get.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/balance.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/reservations.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/home_page.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/balance_screen.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/reservations_screen.dart';
+import 'package:flutter_projet_tutore/views/bottomNavBar/home_page_screen.dart';
 
 class MyWidget extends StatelessWidget {
   const MyWidget({super.key});

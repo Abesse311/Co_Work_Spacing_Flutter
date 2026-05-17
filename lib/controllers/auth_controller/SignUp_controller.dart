@@ -1,30 +1,20 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/variables.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_projet_tutore/views/bottomNavBar/principale.dart';
+import 'package:flutter_projet_tutore/services/auth_service.dart';
 
 class Auth_SignUp_Controller extends GetxController {
-
-  // Login
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-
-  // Register
+  // ── Form controllers ───────────────────────────────────────────────────────
   final nameController = TextEditingController();
   final registerEmailController = TextEditingController();
   final registerPasswordController = TextEditingController();
   final phoneController = TextEditingController();
 
+  // ── Observable state ───────────────────────────────────────────────────────
   final obscureText = true.obs;
+  final isLoading = false.obs;
 
   @override
   void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
     nameController.dispose();
     registerEmailController.dispose();
     registerPasswordController.dispose();
@@ -32,71 +22,79 @@ class Auth_SignUp_Controller extends GetxController {
     super.onClose();
   }
 
-  void toggleObscure() {
-    obscureText.value = !obscureText.value;
-  }
+  // ── Actions ────────────────────────────────────────────────────────────────
 
-  Future<void> loginUser() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      Get.snackbar(
-        'Champs vides',
-        emailController.text.isEmpty
-            ? 'Veuillez remplir le champ Email.'
-            : 'Veuillez remplir le champ Mot de passe.',
-      );
+  /// Validates all fields, calls POST /auth/local/signup,
+  /// then navigates to the Email Verification screen on success.
+  Future<void> registerEmail_password() async {
+    final username = nameController.text.trim();
+    final email = registerEmailController.text.trim();
+    final password = registerPasswordController.text.trim();
+    final phone = phoneController.text.trim();
+
+    // ── Local validation ───────────────────────────────────────────────────
+    if (username.isEmpty || email.isEmpty || password.isEmpty || phone.isEmpty) {
+      _snack('Empty Fields', 'Please fill in all required fields.');
       return;
     }
 
-    final url = Uri.parse('${ngrok_url}/login');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "email": emailController.text,
-        "password": passwordController.text,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_email', emailController.text);
-      if (responseData['id'] != null) {
-        await prefs.setInt('user_id', responseData['id']);
-      }
-      Get.snackbar('Succès', 'Connexion réussie !');
-      Get.offAll(() => MyWidget());
-    } else {
-      Get.snackbar('Erreur', jsonDecode(response.body)['error']);
-    }
-  }
-
-  Future<void> registerUser() async {
-    if (nameController.text.isEmpty ||
-        phoneController.text.isEmpty ||
-        registerPasswordController.text.isEmpty ||
-        registerEmailController.text.isEmpty) {
-      Get.snackbar('Champs vides', 'Veuillez remplir le champ Vide');
+    if (!GetUtils.isEmail(email)) {
+      _snack('Invalid Email', 'Please enter a valid email address.');
       return;
     }
 
-    final url = Uri.parse('${ngrok_url}/users');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "name": nameController.text,
-        "email": registerEmailController.text,
-        "password": registerPasswordController.text,
-        "number": int.tryParse(phoneController.text) ?? 0,
-      }),
+    if (phone.length != 10) {
+      _snack('Invalid Phone Number', 'Phone number must be exactly 10 digits.');
+      return;
+    }
+
+    if (password.length < 8) {
+      _snack('Weak Password', 'Password must be at least 6 characters.');
+      return;
+    }
+
+    // ── API call ───────────────────────────────────────────────────────────
+    isLoading.value = true;
+
+    final result = await AuthService.signup(
+      username: username,
+      email: email,
+      password: password,
+      phoneNumber: phone,
     );
 
-    if (response.statusCode == 201) {
-      Get.snackbar('Succès', 'Inscription réussie !');
-      Get.to(() => LoginScreen());
+    isLoading.value = false;
+
+    if (result['success'] == true) {
+      // Clear all fields so they are empty if the user comes back later
+      nameController.clear();
+      registerEmailController.clear();
+      registerPasswordController.clear();
+      phoneController.clear();
+
+      // Navigate to email verification, passing the registered email
+      Get.toNamed('/verify-email', arguments: email);
     } else {
-      Get.snackbar('Erreur', jsonDecode(response.body)['error']);
+      _snack('Sign Up Failed', result['message']); // <<====
     }
+  }
+
+  /// Toggles password visibility.
+  void toggleObscure() => obscureText.value = !obscureText.value;
+
+  // ── Helper ─────────────────────────────────────────────────────────────────
+  void _snack(String title, String message, {bool isError = true}) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 4),
+      backgroundColor: isError
+          ? const Color(0xFFAA2213).withOpacity(0.9)
+          : const Color(0xFF2E6845).withOpacity(0.9),
+      colorText: const Color(0xFFFFFFFF),
+      margin: const EdgeInsets.all(12),
+      borderRadius: 12,
+    );
   }
 }

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/models/room_model.dart';
-import 'package:flutter_projet_tutore/views/La_Reservation_prosses/BookingPage.dart';
 
 class RoomItem extends StatelessWidget {
   final Room room;
@@ -13,16 +12,15 @@ class RoomItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.to(
-          () => RoomBookingPage(
-            room: {
-              'id': room.id,
-              'name': room.name,
-              'slot_price': room.price,
-              'address': room.address,
-              'capacity': room.capacity,
-            },
-          ),
+        Get.toNamed(
+          '/booking',
+          arguments: {
+            'id': room.id,
+            'name': room.name,
+            'slot_price': room.price,
+            'address': room.address,
+            'capacity': room.capacity,
+          },
         );
       },
       child: Container(
