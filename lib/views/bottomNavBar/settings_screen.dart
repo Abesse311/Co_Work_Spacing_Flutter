@@ -1,10 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/balance_controller.dart';
 import 'package:flutter_projet_tutore/controllers/bottomNavBar_conrollers/settings_controller.dart';
-import 'package:flutter_projet_tutore/views/auth/SignIn_screen.dart';
 import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -19,14 +16,11 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        actions: [IconButton(onPressed: () async{
-          await GoogleSignIn().signOut(); // clears Google session → forces account picker next time
-          await FirebaseAuth.instance.signOut();
-          Get.offAll(() => LoginScreen());
-          }, icon: Icon(Icons.exit_to_app))],
         title: Text(
           'Account',
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Colors.white,
+              ),
         ),
       ),
 
@@ -64,7 +58,7 @@ class SettingsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             subtitle: const Text(
-              'change email or number',
+              'change email or verify phone',
               style: TextStyle(fontSize: 13, color: AppTheme.textGrey),
             ),
             onTap: controller.goToAccountSettings,

@@ -10,6 +10,14 @@ class RoomItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Build a simple price label from booking types
+    String priceLabel = '';
+    if (room.bookingTypes.isNotEmpty) {
+      final prices = room.bookingTypes.map((t) => (t['price'] ?? 0).toDouble()).toList();
+      final minPrice = prices.reduce((a, b) => a < b ? a : b);
+      priceLabel = 'From ${minPrice.toStringAsFixed(2)} DZD';
+    }
+
     return GestureDetector(
       onTap: () {
         Get.toNamed(
@@ -17,8 +25,6 @@ class RoomItem extends StatelessWidget {
           arguments: {
             'id': room.id,
             'name': room.name,
-            'slot_price': room.price,
-            'address': room.address,
             'capacity': room.capacity,
           },
         );
@@ -30,7 +36,7 @@ class RoomItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 2,
               offset: Offset(0, 1),
@@ -66,17 +72,14 @@ class RoomItem extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 4),
-                    Text(
-                      room.address,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                    Text(
-                      '${room.price} DZD/hour',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 46, 104, 69),
-                        fontWeight: FontWeight.bold,
+                    if (priceLabel.isNotEmpty)
+                      Text(
+                        priceLabel,
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 46, 104, 69),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
                     SizedBox(height: 4),
                     Text(
                       'Capacity: ${room.capacity}',

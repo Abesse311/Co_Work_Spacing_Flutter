@@ -1,0 +1,47 @@
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant V as BookingPage (View)
+    participant C as BookingController (Controller)
+    participant S as AuthService (Service)
+    participant B as Backend API (Server)
+
+    %% Scenario 1: Confirming Room Booking
+    Note over U, B: Scenario 1: Room Booking Flow (Success & Error validation)
+
+    U->>V: Taps "Verify Phone / Confirm Booking"
+    V->>C: confirmReservation()
+    
+    %% Step 1: Check validation
+    C->>C: Verify selection & token
+    alt Missing token or invalid selections
+        C-->>V: Show Validation Snack (AuthSnackbar)
+    else Valid local state
+        C->>V: Show Booking Dialog (Confirm Reservation?)
+        U->>V: Confirms booking Dialog
+        V->>C: _sendReservation(typeId, date, startTime, endTime, token)
+        C->>V: Show Loading Spinner (CircularProgressIndicator)
+        
+        C->>S: POST /bookings (network request)
+        S->>B: HTTP POST request with Bearer token
+        
+        alt API Success (200 / 201 Created)
+            B-->>S: HTTP 200/201 (JSON payload)
+            S-->>C: Map: { success: true, message: 'Reservation confirmed!' }
+            C-->>V: Dismiss loading spinner
+            C-->>V: Show Success Snack ("Reservation confirmed!")
+            C->>C: _clearSelections()
+            C->>C: fetchOccupiedDates() (Refresh Calendar)
+        else API Failure: Phone Not Verified (400/403)
+            B-->>S: HTTP 400/403 {"detail": "Veuillez vérifier votre numéro de téléphone..."}
+            S-->>C: Map: { success: false, statusCode: 403, message: '...' }
+            C-->>V: Dismiss loading spinner
+            C->>C: Intercept & translate French message to English
+            C-->>V: Show Error Snack ("Please verify your phone number in settings...")
+        else API Failure: General Error (500/Timeout)
+            B-->>S: HTTP Status/Timeout Exception
+            S-->>C: Map: { success: false, message: 'Connection error' }
+            C-->>V: Dismiss loading spinner
+            C-->>V: Show Error Snack ("Connection error")
+        end
+    end

@@ -1,0 +1,66 @@
+classDiagram
+    direction TB
+
+    %% ─── MODELS (Domain Data Layers) ───
+    class User {
+        +String uid
+        +String name
+        +String email
+        +String role
+        +double balance
+        +fromJson(Map json) User$
+    }
+
+    class Room {
+        +int id
+        +String name
+        +double price
+        +String address
+        +String? imageBase64
+        +int capacity
+        +List~Map~ bookingTypes
+        +fromJson(Map json) Room$
+    }
+
+    class LocationData {
+        +int id
+        +String name
+        +String? imageBase64
+        +fromJson(Map json) LocationData$
+    }
+
+    class Reservation {
+        +int id
+        +String title
+        +String location
+        +String date
+        +String rawDate
+        +String startTime
+        +String endTime
+        +int slotCount
+        +String image
+        +dynamic price
+        +String status
+        +String type
+        +bool canCancel
+        +String subtitle
+        +fromJson(Map json) Reservation$
+    }
+
+    class TransactionHistory {
+        +int id
+        +String type
+        +double amount
+        +String? refId
+        +String? roomName
+        +String? locationName
+        +DateTime createdAt
+        +fromJson(Map json) TransactionHistory$
+    }
+
+    %% ─── RELATIONSHIPS & ASSOCIATIONS ───
+    User "1" --> "*" Reservation : places
+    User "1" --> "*" TransactionHistory : has
+    Reservation "*" --> "1" Room : reserves
+    Room "*" --> "1" LocationData : belongs to
+    TransactionHistory "*" ..> Reservation : references

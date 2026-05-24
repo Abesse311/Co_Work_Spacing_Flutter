@@ -1,0 +1,173 @@
+# Calendar-Based Booking UX — Implementation Plan
+
+## Critical Discovery From API Analysis
+
+> [!CAUTION]
+> `/bookings/availability` **does not exist** in the backend. The entire previous slot-fetching system was calling a non-existent endpoint. All slot display bugs stem from this root cause.
+
+The **correct** endpoint is:
+
+| Endpoint | Method | Auth | Params |
+|---|---|---|---|
+| `/bookings/occupied-slots` | GET | Bearer token | `room_id`, `booking_type_id` |
+
+**What it returns:** A list of already-occupied date strings (or slots) for the given room + booking type, covering **today → 90 days ahead**. No date parameter is needed — the backend computes the window automatically.
+
+---
+
+## Proposed Approach
+
+### Calendar Library: `table_calendar`
+
+I recommend **`table_calendar`** (not Syncfusion) because:
+- ✅ Free, no license required
+- ✅ Natively supports: disabled days, event markers, range selection, custom builders
+- ✅ Lightweight and very well maintained
+- ✅ Perfect for exactly this use case
+
+---
+
+## How it Works (New Flow)
+
+```
+User picks booking type (Journée / Semaine)
+        ↓
+Controller calls GET /bookings/occupied-slots once
+        ↓
+Gets back a list of occupied dates for 90 days
+        ↓
+Calendar displays → occupied dates = greyed out/blocked
+                  → free dates = selectable (green tint)
+        ↓
+[Day]  User taps a free day → confirms
+[Week] User taps a start day → system checks 5 consecutive days
+       → if all 5 are free: highlight week range → confirm
+       → if any day is blocked: show warning, ask to pick another
+```
+
+---
+
+## Proposed Changes
+
+### pubspec.yaml
+
+#### [MODIFY] [pubspec.yaml](file:///c:/Users/abess/OneDrive/Desktop/Flutter/Co_working_space/flutter_projet_tutore/pubspec.yaml)
+Add one dependency:
+```yaml
+table_calendar: ^3.1.2
+```
+
+---
+
+### Controller Layer
+
+#### [MODIFY] [booking_controller.dart](file:///c:/Users/abess/OneDrive/Desktop/Flutter/Co_working_space/flutter_projet_tutore/lib/controllers/Reservation_prosses/booking_controller.dart)
+
+**Remove:**
+- `fetchAvailability()` — called wrong endpoint
+- `availability` observable list
+- `isLoadingSlots`, `selectedStartSlot`, `selectedEndSlot`
+- `slotToMinutes()`, `isSlotSelected()`, `selectSlot()`
+- All the broken slot-parsing logic
+
+**Add:**
+- `occupiedDates` — `RxSet<DateTime>` — the blocked days from the API
+- `selectedDay` — `Rxn<DateTime>` — the day the user tapped
+- `selectedWeekStart` — `Rxn<DateTime>` — for week bookings
+- `isLoadingOccupied` — loading state
+- `fetchOccupiedDates()` — calls `/bookings/occupied-slots` with Bearer token
+- `isDateOccupied(DateTime)` — checks if a date is in the occupied set
+- `isWeekAvailable(DateTime start)` — checks if start..start+4 are all free
+- Updated `confirmReservation()` — uses `selectedDay` or `selectedWeekStart`
+
+---
+
+### View Layer
+
+#### [MODIFY] [BookingPage.dart](file:///c:/Users/abess/OneDrive/Desktop/Flutter/Co_working_space/flutter_projet_tutore/lib/views/La_Reservation_prosses/BookingPage.dart)
+
+**Remove:** The entire slot grid + `_buildSlotsGrid()` + `_buildDatePicker()` + `_formatSlotRange()`
+
+**Add:**
+- A `TableCalendar` widget showing 3 months ahead
+- **Day booking mode:**
+  - Occupied dates → red/grey background, not tappable
+  - Free dates → normal, tappable
+  - Selected date → green highlight
+- **Week booking mode:**
+  - Occupied dates → red/grey, not tappable
+  - When user taps a free date → check 5 days:
+    - If all 5 are free → highlight the range in green + show summary card "Week: 21 May – 25 May 2026"
+    - If any day is blocked → show inline message "This week contains a reserved day, please pick another start date"
+- Confirm button at the bottom — enabled only when a valid selection exists
+
+---
+
+## UI Mockup
+
+### Day Booking
+```
+╔═══════════════════════════════╗
+║  Reservation - Room Name      ║
+╠═══════════════════════════════╣
+║  [ Journée ]  [ Semaine ]     ║  ← booking type chips
+╠═══════════════════════════════╣
+║       May 2026                ║
+║  Mo Tu We Th Fr Sa Su        ║
+║              1  2  3          ║
+║   4  5  6  7  8  9  10       ║
+║  11 12 13 ██ 15 16 17       ║  ← day 14 blocked (red)
+║  18 19 20 21 22 23 24        ║
+║  25 26 27 28 29 30 31        ║
+╠═══════════════════════════════╣
+║  Selected: Wednesday 21 May   ║
+║  Price: 4999 DZD              ║
+╠═══════════════════════════════╣
+║       [ Confirm Booking ]     ║
+╚═══════════════════════════════╝
+```
+
+### Week Booking — Valid Selection
+```
+╔═══════════════════════════════╗
+║  Reservation - Room Name      ║
+╠═══════════════════════════════╣
+║  [ Journée ]  [ Semaine ]     ║
+╠═══════════════════════════════╣
+║       May 2026                ║
+║  Mo Tu We Th Fr Sa Su        ║
+║  ░░ ░░ ░░ ░░ ░░              ║  ← week 18-22 free (highlighted)
+║  ██ ██ ██ ██ ██ 23 24       ║  ← week 18-22 selected in green
+╠═══════════════════════════════╣
+║  ✅ Week: 18 May – 22 May    ║
+║  Price: 6300 DZD              ║
+╠═══════════════════════════════╣
+║       [ Confirm Booking ]     ║
+╚═══════════════════════════════╝
+```
+
+---
+
+## Verification Plan
+
+### Testing steps
+1. Open a room with both Journée and Semaine types
+2. Select **Journée** → calendar should show occupied dates as blocked → pick free day → Confirm
+3. Select **Semaine** → tap a start day where 5 days are free → green week highlight → Confirm
+4. Select **Semaine** → tap a start day where any of the 5 days is occupied → warning message, no confirmation possible
+5. Hot-reload and verify no snackbar errors appear
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> **Q1 — Occupied slots response format:** The OpenAPI spec returns `{}` (untyped). We need to know the exact JSON format the endpoint returns. Options:
+> - `["2026-05-20", "2026-05-21"]` — list of date strings
+> - `[{"date": "2026-05-20"}, ...]` — list of objects
+> - Other format
+>
+> → **Action:** Will add a print statement to discover the format on first run, then finalize the parser.
+
+> [!IMPORTANT]
+> **Q2 — Week start day:** For weekly bookings, should the 5-day window always be Mon–Fri (ignoring the exact tap), or start from the tapped date? Currently planned to start from the tapped date (any day → +4 days).

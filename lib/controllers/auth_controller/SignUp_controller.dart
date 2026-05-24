@@ -1,100 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/services/auth_service.dart';
+import 'package:flutter_projet_tutore/core/helper/auth_snackbar.dart';
 
 class Auth_SignUp_Controller extends GetxController {
   // ── Form controllers ───────────────────────────────────────────────────────
-  final nameController = TextEditingController();
-  final registerEmailController = TextEditingController();
+  final nameController             = TextEditingController();
+  final registerEmailController    = TextEditingController();
   final registerPasswordController = TextEditingController();
-  final phoneController = TextEditingController();
 
-  // ── Observable state ───────────────────────────────────────────────────────
   final obscureText = true.obs;
-  final isLoading = false.obs;
+  final isLoading   = false.obs;
 
   @override
   void onClose() {
     nameController.dispose();
     registerEmailController.dispose();
     registerPasswordController.dispose();
-    phoneController.dispose();
     super.onClose();
   }
 
-  // ── Actions ────────────────────────────────────────────────────────────────
-
-  /// Validates all fields, calls POST /auth/local/signup,
-  /// then navigates to the Email Verification screen on success.
+  // ── REGISTER ───────────────────────────────────────────────────────────────
+  /// POST /auth/local/signup
   Future<void> registerEmail_password() async {
     final username = nameController.text.trim();
-    final email = registerEmailController.text.trim();
+    final email    = registerEmailController.text.trim();
     final password = registerPasswordController.text.trim();
-    final phone = phoneController.text.trim();
 
-    // ── Local validation ───────────────────────────────────────────────────
-    if (username.isEmpty || email.isEmpty || password.isEmpty || phone.isEmpty) {
-      _snack('Empty Fields', 'Please fill in all required fields.');
+    // ── Frontend validation (empty / format / strength only) ──────────────
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      AuthSnackbar.error('Empty Fields', 'Please fill in all required fields.');
       return;
     }
-
     if (!GetUtils.isEmail(email)) {
-      _snack('Invalid Email', 'Please enter a valid email address.');
+      AuthSnackbar.error('Invalid Email', 'Please enter a valid email address.');
       return;
     }
-
-    if (phone.length != 10) {
-      _snack('Invalid Phone Number', 'Phone number must be exactly 10 digits.');
-      return;
-    }
-
     if (password.length < 8) {
-      _snack('Weak Password', 'Password must be at least 6 characters.');
+      AuthSnackbar.error('Weak Password', 'Password must be at least 8 characters.');
       return;
     }
 
     // ── API call ───────────────────────────────────────────────────────────
     isLoading.value = true;
-
     final result = await AuthService.signup(
       username: username,
       email: email,
       password: password,
-      phoneNumber: phone,
     );
-
     isLoading.value = false;
 
     if (result['success'] == true) {
-      // Clear all fields so they are empty if the user comes back later
       nameController.clear();
       registerEmailController.clear();
       registerPasswordController.clear();
-      phoneController.clear();
-
-      // Navigate to email verification, passing the registered email
       Get.toNamed('/verify-email', arguments: email);
-    } else {
-      _snack('Sign Up Failed', result['message']); // <<====
+      return;
+    }
+
+    // ── Backend business errors (source: error_codes_per_route.md) ──────────
+    switch (result['statusCode'] as int? ?? 0) {
+      case 400:
+        AuthSnackbar.error('Email Already Used',
+            'An account with this email already exists. Please sign in.');
+        break;
+      case 422:
+        AuthSnackbar.error('Invalid Data',
+            'Please check your inputs and try again.');
+        break;
+      case 500:
+        AuthSnackbar.error('Email Error',
+            'We could not send the verification email. Please try again later.');
+        break;
+      default:
+        AuthSnackbar.error('Sign Up Failed',
+            result['message'] ?? 'An error occurred. Please try again.');
     }
   }
 
-  /// Toggles password visibility.
   void toggleObscure() => obscureText.value = !obscureText.value;
-
-  // ── Helper ─────────────────────────────────────────────────────────────────
-  void _snack(String title, String message, {bool isError = true}) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 4),
-      backgroundColor: isError
-          ? const Color(0xFFAA2213).withOpacity(0.9)
-          : const Color(0xFF2E6845).withOpacity(0.9),
-      colorText: const Color(0xFFFFFFFF),
-      margin: const EdgeInsets.all(12),
-      borderRadius: 12,
-    );
-  }
 }

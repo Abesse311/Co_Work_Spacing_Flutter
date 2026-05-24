@@ -10,6 +10,8 @@ import 'package:flutter_projet_tutore/views/La_Reservation_prosses/Locations.dar
 import 'package:flutter_projet_tutore/views/La_Reservation_prosses/rooms.dart';
 import 'package:flutter_projet_tutore/views/La_Reservation_prosses/BookingPage.dart';
 import 'package:flutter_projet_tutore/views/Settings_Pages/Profile_Settings_Screen.dart';
+import 'package:flutter_projet_tutore/views/Settings_Pages/Phone_Verify_Screen.dart';
+import 'package:flutter_projet_tutore/views/auth/ForgotPassword_screens.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 
@@ -55,6 +57,21 @@ class MyApp extends StatelessWidget {
           page: () => const EmailVerificationScreen(),
           transition: Transition.rightToLeft,
         ),
+        GetPage(
+          name: '/forgot-password',
+          page: () => const ForgotPasswordScreen(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/forgot-password/verify',
+          page: () => const VerifyResetCodeScreen(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/forgot-password/reset',
+          page: () => const ResetPasswordScreen(),
+          transition: Transition.rightToLeft,
+        ),
 
         // ── Main ────────────────────────────────────────────────────────
         GetPage(
@@ -93,6 +110,11 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/settings/account',
           page: () => const AccountSettingsScreen(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/settings/phone-verify',
+          page: () => const PhoneVerifyScreen(),
           transition: Transition.rightToLeft,
         ),
       ],
@@ -142,4 +164,3 @@ class MyApp extends StatelessWidget {
 //     );
 //   }
 // }
-

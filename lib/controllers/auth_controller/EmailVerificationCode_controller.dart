@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/services/auth_service.dart';
+import 'package:flutter_projet_tutore/core/helper/auth_snackbar.dart';
 
 /// Controller for the Email Verification screen.
 ///
-/// Receives the registered [email] from [SignUp_controller] via
+/// Receives the registered [email] from [Auth_SignUp_Controller] via
 /// [Get.arguments] and calls POST /auth/local/confirm-email.
-/// On success → navigates to the Sign In screen (JWT is NOT stored here).
+/// On success → navigates to the Sign In screen.
 class EmailVerificationCodeController extends GetxController {
   // ── State ──────────────────────────────────────────────────────────────────
   final codeController = TextEditingController();
-  final isLoading = false.obs;
+  final isLoading      = false.obs;
+  final email          = ''.obs;
 
-  /// The email passed from the Signup controller via [Get.arguments].
-  final email = ''.obs;
-
-  // ── Lifecycle ──────────────────────────────────────────────────────────────
   @override
   void onInit() {
     super.onInit();
-    // Get.arguments is the registered email string
     email.value = Get.arguments as String? ?? '';
   }
 
@@ -29,61 +26,47 @@ class EmailVerificationCodeController extends GetxController {
     super.onClose();
   }
 
-  // ── Actions ────────────────────────────────────────────────────────────────
-
-  /// Validates the code field and calls the confirm-email endpoint.
-  /// On success → clears the navigation stack and pushes [LoginScreen].
+  // ── CONFIRM EMAIL ──────────────────────────────────────────────────────────
+  /// POST /auth/local/confirm-email
   Future<void> confirmEmail() async {
     final code = codeController.text.trim();
 
+    // ── Frontend validation ────────────────────────────────────────────────
     if (code.isEmpty) {
-      _snack('Missing Code', 'Please enter the verification code sent to your email.');
+      AuthSnackbar.error('Missing Code',
+          'Please enter the verification code sent to your email.');
       return;
     }
 
-    // if (email.value.isEmpty) {
-    //   _snack('Error', 'Email address is missing. Please sign up again.');
-    //   return;
-    // }
-
     isLoading.value = true;
-
     final result = await AuthService.confirmEmail(
       email: email.value,
       code: code,
     );
-
     isLoading.value = false;
 
     if (result['success'] == true) {
-      _snack(
-        'Email Verified ',
-        'Your account is confirmed. Please sign in.',
-        isError: false,
-      );
-      // Clear the entire back-stack → Sign In page
+      AuthSnackbar.success('Email Verified ✓',
+          'Your account is confirmed. Please sign in.');
       Get.offAllNamed('/login');
-    } else {
-      _snack(
-        'Wrong Code',
-        'The verification code you entered is incorrect. Please check your inbox and try again.',
-      );
+      return;
     }
-  }
 
-  // ── Helper ─────────────────────────────────────────────────────────────────
-  void _snack(String title, String message, {bool isError = true}) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 4),
-      backgroundColor: isError
-          ? const Color(0xFFAA2213).withOpacity(0.9)
-          : const Color(0xFF2E6845).withOpacity(0.9),
-      colorText: const Color(0xFFFFFFFF),
-      margin: const EdgeInsets.all(12),
-      borderRadius: 12,
-    );
+    // ── Backend business errors (source: error_codes_per_route.md) ──────────
+    switch (result['statusCode'] as int? ?? 0) {
+      case 400:
+        // No code found for this email, or user data not found
+        AuthSnackbar.error('Code Expired',
+            'No verification code was found for this email. Please sign up again.');
+        break;
+      case 401:
+        // Invalid code
+        AuthSnackbar.error('Wrong Code',
+            'The verification code is incorrect. Please check your inbox and try again.');
+        break;
+      default:
+        AuthSnackbar.error('Verification Failed',
+            result['message'] ?? 'An error occurred. Please try again.');
+    }
   }
 }

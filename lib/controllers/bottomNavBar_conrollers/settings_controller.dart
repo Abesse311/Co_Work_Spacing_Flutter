@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SettingsController extends GetxController {
 
@@ -98,12 +98,16 @@ class SettingsController extends GetxController {
     // Clear the JWT so main.dart won't auto-login on next launch
     const storage = FlutterSecureStorage();
     await storage.delete(key: 'auth_token');
+    await storage.delete(key: 'user_id');
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user_email');
-    await prefs.remove('user_id');
+    // Sign out from Google & Firebase (clears Google session → forces account picker next time)
+    try {
+      await GoogleSignIn().signOut();
+      await FirebaseAuth.instance.signOut();
+    } catch (_) {
+      // If the user wasn't signed in via Google/Firebase, ignore errors
+    }
 
     Get.offAllNamed('/login');
   }
-
 }

@@ -7,7 +7,7 @@ import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final HomeController controller = Get.put(HomeController());
+    // final HomeController controller = Get.put(HomeController());
 
     return Scaffold(
       body: Column(
@@ -53,7 +53,7 @@ class HomePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: GestureDetector(
-              onTap: controller.goToLocations,
+              onTap: (){Get.toNamed("/locations",arguments: null);},
               child: Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(vertical: 20, horizontal: 24),

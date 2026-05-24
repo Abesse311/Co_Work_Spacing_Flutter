@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignUp_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
@@ -106,28 +105,6 @@ class RegisterScreen extends StatelessWidget {
                     ),
                   ),
                   ),
-                   SizedBox(height: 16),
-
-                  //////////////////////////// Phone Textfiled
-                  Container(
-                  decoration: AppTheme.inputDecoration,
-                  child: TextField(
-                    controller: controller.phoneController,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(10),
-                    ],
-                    decoration: InputDecoration(
-                      hintText: 'phone number',
-                      prefixIcon: Icon(
-                        Icons.phone,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-
                    SizedBox(height: 24),
 
                   ///////////////////// Sign Up Button

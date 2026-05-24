@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_projet_tutore/variables.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_projet_tutore/services/auth_service.dart';
+import 'package:flutter_projet_tutore/core/helper/auth_snackbar.dart';
 
 class ProfileSettingsController extends GetxController {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
 
-  // للعرض في الـ UI
+  // For displaying in the UI
   final userName = ''.obs;
   final userEmail = ''.obs;
   final userPhone = ''.obs;
@@ -20,6 +17,8 @@ class ProfileSettingsController extends GetxController {
   final isLoading = false.obs;
   String? userId;
   static const _storage = FlutterSecureStorage();
+
+  final isGoogleAuth = false.obs;
 
   @override
   void onInit() {
@@ -35,150 +34,366 @@ class ProfileSettingsController extends GetxController {
     super.onClose();
   }
 
+  // ── FETCH USER PROFILE ─────────────────────────────────────────────────────
+  /// GET /me
   Future<void> fetchProfile() async {
     isLoading.value = true;
 
     final token = await _storage.read(key: 'auth_token');
     if (token == null || token.isEmpty) {
       isLoading.value = false;
-      Get.snackbar('Erreur', 'Utilisateur non connecté');
+      AuthSnackbar.error('Error', 'User not connected. Please log in again.');
       return;
     }
 
-    try {
-      final response = await http.get(
-        Uri.parse('${ngrok_url}/me'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        // Store uid for update calls
-        userId = data['uid']?.toString() ?? data['id']?.toString();
+    final provider = await _storage.read(key: 'auth_provider');
+    final hasPasswordFlag = await _storage.read(key: 'has_password');
+    
+    // Decoupled password display logic: if has_password is true, user has password.
+    if (hasPasswordFlag == 'true') {
+      isGoogleAuth.value = false;
+    } else {
+      isGoogleAuth.value = (provider == 'google');
+    }
 
-        nameController.text = data['name'] ?? data['username'] ?? '';
-        emailController.text = data['email'] ?? '';
-        phoneController.text = data['phone'] ?? data['number']?.toString() ?? '';
+    final result = await AuthService.getUserProfile(token);
+    isLoading.value = false;
 
-        userName.value = nameController.text;
-        userEmail.value = emailController.text;
-        userPhone.value = phoneController.text;
-      } else {
-        Get.snackbar('Erreur', 'Failed to load profile');
-      }
-    } catch (e) {
-      Get.snackbar('Erreur', 'Error loading profile');
-    } finally {
-      isLoading.value = false;
+    if (result['success'] == true) {
+      final data = result['data'] as Map<String, dynamic>;
+      userId = data['uid']?.toString() ?? data['id']?.toString();
+
+      nameController.text = data['name'] ?? data['username'] ?? '';
+      emailController.text = data['email'] ?? '';
+      phoneController.text = data['phone'] ?? data['number']?.toString() ?? '';
+
+      userName.value = nameController.text;
+      userEmail.value = emailController.text;
+      userPhone.value = phoneController.text;
+      return;
+    }
+
+    // ── Backend business errors (source: error_codes_per_route.md) ──────────
+    switch (result['statusCode'] as int? ?? 0) {
+      case 401:
+        AuthSnackbar.error('Session Expired', 'Your authentication token is invalid or expired.');
+        break;
+      case 404:
+        AuthSnackbar.error('User Not Found', 'Could not locate your account user profile.');
+        break;
+      default:
+        AuthSnackbar.error('Error', result['message'] ?? 'Failed to load profile details.');
     }
   }
 
-  Future<void> updateProfileField(String field, String value) async {
-    isLoading.value = true;
-    if (userId == null) {
-      isLoading.value = false;
-      Get.snackbar('Erreur', 'Utilisateur non connecté');
-      return;
-    }
-
-    final token = await _storage.read(key: 'auth_token');
-    if (token == null || token.isEmpty) {
-      isLoading.value = false;
-      Get.snackbar('Erreur', 'Utilisateur non connecté');
-      return;
-    }
-
-    // Map local field names to the API's UpdateUserRequest field names
-    // API accepts: username, phone (NOT name / number)
-    final apiField = field == 'name' ? 'username' : field == 'number' ? 'phone' : field;
-
-    try {
-      final response = await http.put(
-        Uri.parse('${ngrok_url}/users/$userId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({apiField: value}),
-      );
-      print('🔍 PUT /users/$userId [$apiField=$value] → ${response.statusCode}: ${response.body}');
-      if (response.statusCode == 200) {
-        if (field == 'name') {
-          nameController.text = value;
-          userName.value = value;
-        }
-        if (field == 'number') {
-          phoneController.text = value;
-          userPhone.value = value;
-        }
-        Get.snackbar('Succès', 'Updated successfully!');
-      } else {
-        Get.snackbar('Erreur', 'Failed to update (${response.statusCode})');
-      }
-    } catch (e) {
-      Get.snackbar('Erreur', 'Erreur réseau: $e');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  void showEditDialog(String field, String apiField) {
-    final isPhone = field == 'Phone';
-    final tempController = TextEditingController(
-      text: field == 'Name'
-          ? userName.value
-          : field == 'Email'
-              ? userEmail.value
-              : userPhone.value,
-    );
+  // ── UPDATE EMAIL (Two-Step Flow) ──────────────────────────────────────────
+  void showEmailUpdateDialog() {
+    final emailCtrl = TextEditingController(text: userEmail.value);
     Get.dialog(
       AlertDialog(
-        title: Text('Edit $field'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Change Email'),
         content: TextField(
-          controller: tempController,
-          keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
-          inputFormatters: isPhone
-              ? [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ]
-              : null,
-          decoration: InputDecoration(
-            labelText: field,
-            hintText: isPhone ? '10-digit phone number' : null,
-            counterText: isPhone ? '' : null, // hides the counter
+          controller: emailCtrl,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            labelText: 'New Email Address',
+            hintText: 'Enter your new email',
           ),
-          maxLength: isPhone ? 10 : null,
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
+            onPressed: Get.back,
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
           ),
           ElevatedButton(
             onPressed: () async {
-              // Validate phone: must be exactly 10 digits
-              if (isPhone && tempController.text.length != 10) {
-                Get.snackbar(
-                  'Invalid Phone',
-                  'Phone number must be exactly 10 digits.',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor:  Color(0xFFFFC107), // amber/yellow
-                  colorText:  Color(0xFF1A1A1A),
-                  margin:  EdgeInsets.all(12),
-                  borderRadius: 12,
-                );
+              final newEmail = emailCtrl.text.trim();
+              if (newEmail.isEmpty) {
+                AuthSnackbar.error('Empty Field', 'Please enter your new email address.');
                 return;
               }
-              Get.back();
-              await updateProfileField(apiField, tempController.text);
+              if (!GetUtils.isEmail(newEmail)) {
+                AuthSnackbar.error('Invalid Email', 'Please enter a valid email address.');
+                return;
+              }
+              Get.back(); // close email dialog
+              await _requestEmailUpdate(newEmail);
             },
-            child:  Text('Save'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E6845),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Next', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
+  }
+
+  /// POST /me/email/request
+  Future<void> _requestEmailUpdate(String newEmail) async {
+    isLoading.value = true;
+    final token = await _storage.read(key: 'auth_token');
+    if (token == null) {
+      isLoading.value = false;
+      AuthSnackbar.error('Session Expired', 'You are not logged in.');
+      return;
+    }
+
+    final result = await AuthService.requestEmailUpdate(newEmail: newEmail, token: token);
+    isLoading.value = false;
+
+    if (result['success'] == true) {
+      AuthSnackbar.success('Code Sent', 'A verification code has been sent to your new email.');
+      _showEmailConfirmDialog(newEmail);
+      return;
+    }
+
+    // ── Backend business errors (source: error_codes_per_route.md) ──────────
+    switch (result['statusCode'] as int? ?? 0) {
+      case 401:
+        AuthSnackbar.error('Session Expired', 'Your authentication token is invalid or expired.');
+        break;
+      case 404:
+        AuthSnackbar.error('User Not Found', 'Could not locate your user account.');
+        break;
+      case 409:
+        AuthSnackbar.error('Email Exists', 'This email address is already in use by another account.');
+        break;
+      case 500:
+        AuthSnackbar.error('Email Error', 'Failed to send the verification email. Please try again later.');
+        break;
+      default:
+        AuthSnackbar.error('Error', result['message'] ?? 'Failed to request email update.');
+    }
+  }
+
+  void _showEmailConfirmDialog(String newEmail) {
+    final codeCtrl = TextEditingController();
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Verify New Email'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('A verification code was sent to $newEmail.', style: const TextStyle(color: Colors.black54)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: codeCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Verification Code',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: Get.back,
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final code = codeCtrl.text.trim();
+              if (code.isEmpty) {
+                AuthSnackbar.error('Empty Field', 'Please enter the verification code.');
+                return;
+              }
+              Get.back();
+              await _confirmEmailUpdate(code, newEmail);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E6845),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Verify', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// POST /me/email/confirm
+  Future<void> _confirmEmailUpdate(String code, String newEmail) async {
+    isLoading.value = true;
+    final token = await _storage.read(key: 'auth_token');
+    if (token == null) {
+      isLoading.value = false;
+      AuthSnackbar.error('Session Expired', 'You are not logged in.');
+      return;
+    }
+
+    final result = await AuthService.confirmEmailUpdate(code: code, token: token);
+    isLoading.value = false;
+
+    if (result['success'] == true) {
+      userEmail.value = newEmail;
+      emailController.text = newEmail;
+      AuthSnackbar.success('Success ✓', 'Email updated successfully!');
+      return;
+    }
+
+    // ── Backend business errors (source: error_codes_per_route.md) ──────────
+    switch (result['statusCode'] as int? ?? 0) {
+      case 400:
+        AuthSnackbar.error('No Request Found', 'No pending request to change email is active.');
+        break;
+      case 401:
+        final msg = (result['message'] ?? '').toString().toLowerCase();
+        if (msg.contains('token') || msg.contains('expir') || msg.contains('session') || msg.contains('auth')) {
+          AuthSnackbar.error('Session Expired', 'Your authentication token is invalid or expired.');
+        } else {
+          AuthSnackbar.error('Wrong Code', 'The verification code you entered is invalid. Please try again.');
+        }
+        break;
+      case 404:
+        AuthSnackbar.error('User Not Found', 'Could not locate your user account.');
+        break;
+      default:
+        AuthSnackbar.error('Verification Failed', result['message'] ?? 'Failed to verify new email.');
+    }
+  }
+
+  // ── UPDATE PASSWORD ────────────────────────────────────────────────────────
+  void showPasswordUpdateDialog() {
+    final oldPassCtrl = TextEditingController();
+    final newPassCtrl = TextEditingController();
+    final confirmPassCtrl = TextEditingController();
+    
+    final obscureOld = true.obs;
+    final obscureNew = true.obs;
+    final obscureConfirm = true.obs;
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(isGoogleAuth.value ? 'Set Password' : 'Change Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!isGoogleAuth.value) ...[
+              Obx(() => TextField(
+                    controller: oldPassCtrl,
+                    obscureText: obscureOld.value,
+                    decoration: InputDecoration(
+                      labelText: 'Current Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(obscureOld.value ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => obscureOld.value = !obscureOld.value,
+                      ),
+                    ),
+                  )),
+              const SizedBox(height: 16),
+            ],
+            Obx(() => TextField(
+                  controller: newPassCtrl,
+                  obscureText: obscureNew.value,
+                  decoration: InputDecoration(
+                    labelText: isGoogleAuth.value ? 'Password' : 'New Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(obscureNew.value ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => obscureNew.value = !obscureNew.value,
+                    ),
+                  ),
+                )),
+            const SizedBox(height: 16),
+            Obx(() => TextField(
+                  controller: confirmPassCtrl,
+                  obscureText: obscureConfirm.value,
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(obscureConfirm.value ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => obscureConfirm.value = !obscureConfirm.value,
+                    ),
+                  ),
+                )),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: Get.back,
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final oldP = oldPassCtrl.text;
+              final newP = newPassCtrl.text;
+              final confirmP = confirmPassCtrl.text;
+              
+              if ((!isGoogleAuth.value && oldP.isEmpty) || newP.isEmpty || confirmP.isEmpty) {
+                AuthSnackbar.error('Empty Fields', 'Please fill in all fields.');
+                return;
+              }
+              if (newP.length < 8) {
+                AuthSnackbar.error('Weak Password', 'New password must be at least 8 characters.');
+                return;
+              }
+              if (newP != confirmP) {
+                AuthSnackbar.error('Mismatch', 'New passwords do not match!');
+                return;
+              }
+              
+              Get.back();
+              await _updatePassword(isGoogleAuth.value ? "" : oldP, newP);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E6845),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Save', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// PUT /me/password
+  Future<void> _updatePassword(String oldPassword, String newPassword) async {
+    isLoading.value = true;
+    final token = await _storage.read(key: 'auth_token');
+    if (token == null) {
+      isLoading.value = false;
+      AuthSnackbar.error('Session Expired', 'You are not logged in.');
+      return;
+    }
+
+    final result = await AuthService.updatePassword(
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+      token: token,
+    );
+    isLoading.value = false;
+
+    if (result['success'] == true) {
+      // Mark that this account now has a password — persists across logins.
+      await _storage.write(key: 'has_password', value: 'true');
+      if (isGoogleAuth.value) {
+        isGoogleAuth.value = false;
+        await _storage.write(key: 'auth_provider', value: 'local');
+      }
+      AuthSnackbar.success('Success ✓', 'Password updated successfully!');
+      return;
+    }
+
+    // ── Backend business errors (source: error_codes_per_route.md) ──────────
+    switch (result['statusCode'] as int? ?? 0) {
+      case 401:
+        // Token invalid/expired OR incorrect old password
+        if (result['message']?.toString().toLowerCase().contains('old') == true ||
+            result['message']?.toString().toLowerCase().contains('ancien') == true) {
+          AuthSnackbar.error('Wrong Password', 'The current password you entered is incorrect.');
+        } else {
+          AuthSnackbar.error('Session Expired', 'Your authentication token is invalid or expired.');
+        }
+        break;
+      case 404:
+        AuthSnackbar.error('User Not Found', 'Could not locate your user account.');
+        break;
+      default:
+        AuthSnackbar.error('Failed', result['message'] ?? 'Failed to update password.');
+    }
   }
 }
