@@ -1,0 +1,145 @@
+%% ============================================================
+%%  SUPPLEMENTARY SEQUENCE DIAGRAMS
+%%  Co-Working Space Application
+%%  Scenarios: App Launch, Logout, Set Password (Google Account)
+%% ============================================================
+
+
+%% ============================================================
+%%  DIAGRAM 19 — App Launch / Session Restoration
+%% ============================================================
+
+sequenceDiagram
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant Router as Navigation Router
+
+    Note over App,Router: Diagram 19 — App Launch / Session Restoration
+
+    App->>App: Application starts (main.dart)
+    App->>+Storage: Read auth_token
+    Storage-->>-App: Token value (or null)
+
+    alt No token found (not logged in)
+        App->>Router: Navigate to /register
+        Router-->>App: Registration screen displayed
+    else Token found
+        App->>+Storage: Read auth_provider
+        Storage-->>-App: Provider (local or google)
+        App->>+Storage: Read user_id
+        Storage-->>-App: User ID
+
+        App->>App: Mark user as authenticated
+        App->>Router: Navigate to /home
+        Router-->>App: Home screen displayed
+    end
+
+    Note over App,Router: No network call is made at launch.
+    Note over App,Router: Token validity is verified lazily on first API call.
+
+
+%% ============================================================
+%%  DIAGRAM 20 — User Logout
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant Google as Google Sign-In SDK
+    participant Firebase as Firebase Auth
+    participant Router as Navigation Router
+
+    Note over User,Router: Diagram 20 — User Logout
+
+    User->>App: Navigate to Account tab → Settings
+    User->>App: Tap "Log Out"
+    App-->>User: Show logout confirmation dialog
+
+    alt User cancels
+        App-->>User: Dismiss dialog — no action
+    else User confirms logout
+        App->>+Storage: Delete auth_token
+        App->>Storage: Delete user_id
+        App->>Storage: Delete auth_provider
+        App->>Storage: Delete has_password flag
+        Storage-->>-App: All auth credentials cleared
+
+        App->>+Google: signOut()
+        Google-->>-App: Google session cleared
+
+        App->>+Firebase: signOut()
+        Firebase-->>-App: Firebase session cleared
+
+        Note right of App: Google/Firebase signOut errors are silently ignored
+
+        App->>Router: Navigate to /login (offAllNamed)
+        Router-->>App: All route stack cleared
+        App-->>User: Login screen displayed
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 21 — Set Password for Google Account (First Time)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 21 — Set Password for Google Account (First Time)
+
+    Note over App: User is authenticated via Google — no local password exists
+    Note over App: App detects isGoogleAuth = true from has_password flag
+
+    User->>App: Navigate to Account Settings
+    App-->>User: Password field shows "Set a password" in amber
+
+    User->>App: Tap edit icon next to Password field
+    App-->>User: Show "Set Password" dialog
+    Note right of App: No "Current Password" field — Google account
+    Note right of App: Fields: new password, confirm password
+
+    User->>App: Enter new password + confirm password
+    App->>App: Validate: fields not empty, passwords match, min 8 chars
+
+    alt Passwords do not match
+        App-->>User: Show mismatch validation error
+    else Password too short
+        App-->>User: Show minimum 8 characters error
+    else Validation passes
+        User->>App: Tap Save
+
+        App->>Storage: Read auth_token
+        Storage-->>App: JWT token
+
+        App->>+API: PUT /me/password
+        Note right of App: Header: Authorization Bearer token
+        Note right of App: Body: {old_password: "", new_password}
+        Note right of App: old_password is empty string for Google accounts
+
+        API->>DB: Verify user exists and has no local password
+
+        alt Token invalid or expired
+            DB-->>API: Auth failure
+            API-->>-App: 401 — Session expired
+            App-->>User: Show session expired error
+        else User not found
+            API-->>-App: 404 — User not found
+            App-->>User: Show account error
+        else Password set successfully
+            DB->>DB: Hash and store new password
+            DB->>DB: Mark account as having local password
+            DB-->>API: Password created
+            API-->>-App: 200 — Password set successfully
+            App->>Storage: Write has_password = true
+            App->>Storage: Write auth_provider = "local"
+            App->>App: Set isGoogleAuth = false
+            App-->>User: Show success notification
+            App-->>User: Password field now shows "••••••••"
+            Note right of App: User can now also log in with email + password
+        end
+    end

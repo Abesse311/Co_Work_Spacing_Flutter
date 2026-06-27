@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:flutter_projet_tutore/variables.dart';
+import 'package:flutter_projet_tutore/variable.dart';
 
 /// Low-level HTTP client for all auth endpoints.
 /// Every method returns a plain Map<String, dynamic> so controllers
@@ -274,8 +274,36 @@ class AuthService {
     }
   }
 
+  /// PATCH /me
+  /// Updates user profile details (e.g. username)
+  static Future<Map<String, dynamic>> updateProfile({
+    required String username,
+    required String token,
+  }) async {
+    try {
+      final response = await http
+          .patch(
+            Uri.parse('$ngrok_url/me'),
+            headers: {
+              ..._headers,
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({'username': username}),
+          )
+          .timeout(const Duration(seconds: 60));
+
+      return _parse(response);
+    } on TimeoutException {
+      return _timeoutError();
+    } on SocketException {
+      return _networkError();
+    } catch (e) {
+      return _unexpectedError(e);
+    }
+  }
+
   // ── UPDATE PASSWORD & EMAIL ────────────────────────────────────────────────
-  /// PUT /me/password
+  /// PATCH /me/password
   /// Backend errors:
   ///   401 → Token invalid/expired OR wrong old password
   ///   404 → User not found
@@ -286,7 +314,7 @@ class AuthService {
   }) async {
     try {
       final response = await http
-          .put(
+          .patch(
             Uri.parse('$ngrok_url/me/password'),
             headers: {
               ..._headers,

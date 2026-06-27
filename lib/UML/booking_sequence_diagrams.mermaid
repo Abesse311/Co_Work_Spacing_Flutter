@@ -1,0 +1,277 @@
+%% ============================================================
+%%  BOOKING FLOW SEQUENCE DIAGRAMS
+%%  Co-Working Space Application
+%%  Scenarios: Browse, Availability, Reservation, Cancellation
+%% ============================================================
+
+
+%% ============================================================
+%%  DIAGRAM 5 — Browse Locations
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 5 — Browse Locations
+
+    User->>App: Tap "Book Your Room Now"
+    App->>+API: GET /locations
+    API->>DB: Fetch all active co-working locations
+    DB-->>API: List of locations
+
+    alt No locations available
+        API-->>-App: 200 — Empty list
+        App-->>User: Show "No locations available" message
+    else Locations found
+        API-->>-App: 200 — [{id, name, image_url, ...}]
+        App-->>User: Display location cards list
+        User->>App: Select a location
+        App-->>User: Navigate to Rooms screen
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 6 — Browse Rooms by Location
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 6 — Browse Rooms by Location
+
+    App->>+API: GET /rooms/by-location/{location_name}
+    Note right of App: Path param: location name
+
+    API->>DB: Fetch rooms + booking types for location
+    DB-->>API: Room list with booking type data
+
+    alt No rooms found
+        API-->>-App: 200 — Empty list
+        App-->>User: Show "No rooms available" message
+    else Rooms found
+        API-->>-App: 200 — [{id, name, capacity, type, booking_types, ...}]
+        App-->>User: Display rooms list with details
+        User->>App: Select a room
+        App-->>User: Navigate to Room Booking screen
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 7 — Load Room Booking Types
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 7 — Load Room Booking Types
+
+    App->>+API: GET /rooms/{room_id}/booking-types
+    API->>DB: Fetch active booking types for room
+    DB-->>API: Booking types list
+
+    alt No booking types configured
+        API-->>-App: 200 — Empty list
+        App-->>User: Show unavailable message
+    else One booking type only
+        API-->>-App: 200 — [booking_type]
+        App->>App: Auto-select the single booking type
+        App-->>User: Display booking type pre-selected
+    else Multiple booking types
+        API-->>-App: 200 — [hourly, half-day, full-day, weekly, ...]
+        App-->>User: Display booking type selector
+        User->>App: Select a booking type
+        App->>App: Update selection + clear previous calendar state
+        App-->>User: Trigger availability check
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 8 — Check Room Availability (Occupied Slots)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 8 — Check Room Availability
+
+    App->>Storage: Read auth_token
+    Storage-->>App: JWT token
+
+    App->>+API: GET /bookings/occupied-slots
+    Note right of App: Query: room_id, booking_type_id
+    Note right of API: Returns next 90 days of data
+
+    API->>DB: Fetch occupied periods and time slots
+    DB-->>API: {occupied_periods: [...], occupied_slots: {...}}
+
+    alt Connection error
+        API-->>-App: Network error
+        App-->>User: Show connection error notification
+    else Success
+        API-->>-App: 200 — Occupied data
+        App->>App: Parse occupied periods into disabled dates
+        App->>App: Parse per-day occupied time slots
+        App-->>User: Render calendar with unavailable days highlighted red
+        App-->>User: Show available time slots for selected day
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 9 — Make a Reservation (Confirm Booking)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 9 — Make a Reservation
+
+    User->>App: Select booking type
+    User->>App: Select date from calendar
+    User->>App: Select time slot(s)
+
+    Note over App: App calculates total price locally
+
+    User->>App: Tap "Confirm Reservation"
+    App-->>User: Show confirmation dialog
+    Note right of App: Displays: type, date, time, total price
+
+    alt User cancels dialog
+        App-->>User: Dismiss dialog — no action taken
+    else User confirms
+        App->>Storage: Read auth_token
+        Storage-->>App: JWT token
+
+        App->>+API: POST /bookings
+        Note right of App: Header: Authorization Bearer token
+        Note right of App: Body: {booking_type_id, date, start_time, end_time}
+
+        App-->>User: Show loading indicator
+
+        API->>DB: Validate booking_type_id exists
+        API->>DB: Check user balance is sufficient
+        API->>DB: Check slot is still available
+
+        alt Phone number not verified
+            DB-->>API: Phone missing
+            API-->>-App: 4xx — Phone verification required
+            App-->>User: Show error: verify phone number in settings
+        else Insufficient balance
+            DB-->>API: Balance too low
+            API-->>-App: 402 — Insufficient balance
+            App-->>User: Show insufficient balance error
+        else Slot already taken (race condition)
+            DB-->>API: Slot conflict
+            API-->>-App: 409 — Time slot no longer available
+            App-->>User: Show slot conflict error
+        else Booking successful
+            DB->>DB: Deduct price from user balance
+            DB->>DB: Create booking record
+            DB-->>API: Booking created
+            API-->>-App: 200 — Booking confirmed
+            App-->>User: Show success notification
+            App->>App: Clear calendar selections
+            App->>+API: GET /bookings/occupied-slots
+            API-->>-App: Updated availability data
+            App-->>User: Refresh calendar view
+        end
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 10 — Cancel a Reservation
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 10 — Cancel a Reservation
+
+    User->>App: View reservations list
+    User->>App: Tap Cancel on an active booking
+    App-->>User: Show cancellation confirmation dialog
+
+    alt User dismisses dialog
+        App-->>User: No action taken
+    else User confirms cancellation
+        App->>Storage: Read auth_token
+        Storage-->>App: JWT token
+
+        App->>+API: DELETE /cancel/{booking_id}
+        Note right of App: Header: Authorization Bearer token
+
+        API->>DB: Fetch booking by ID and validate ownership
+
+        alt Booking does not belong to user
+            DB-->>API: Ownership mismatch
+            API-->>-App: 403 — Unauthorized cancellation
+            App-->>User: Show error notification
+        else Booking starts within 24 hours
+            DB-->>API: Too late to cancel
+            API-->>-App: 400 — Cancellation window passed
+            App-->>User: Show error: cannot cancel within 24h
+        else Cancellation allowed
+            DB->>DB: Mark booking status as "cancelled"
+            DB->>DB: Refund 50% of total price to user balance
+            DB-->>API: Cancellation processed
+            API-->>-App: 200 — Booking cancelled + 50% refunded
+            App-->>User: Show success notification with refund amount
+            App->>App: Refresh reservations list
+        end
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 11 — View My Reservations
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 11 — View My Reservations
+
+    User->>App: Navigate to Bookings tab
+    App->>Storage: Read auth_token
+    Storage-->>App: JWT token
+
+    App->>+API: GET /reservations
+    Note right of App: Header: Authorization Bearer token
+
+    API->>DB: Fetch all bookings for authenticated user
+    DB-->>API: List of reservations
+
+    alt Session expired
+        API-->>-App: 401 — Token invalid or expired
+        App-->>User: Show session expired error
+    else No reservations found
+        API-->>-App: 200 — Empty list
+        App-->>User: Show "No reservations yet" state
+    else Reservations found
+        API-->>-App: 200 — [{booking_id, room, date, time, status, price, ...}]
+        App-->>User: Display reservations list
+        Note right of App: Status: active, completed, cancelled
+    end

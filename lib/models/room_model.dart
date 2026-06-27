@@ -1,20 +1,24 @@
 class Room {
-  final int id;
-  final String name;
-  final double price;
-  final String address;
+  final int     id;
+  final String  name;
+  final double  price;
   final String? imageBase64;
-  final int capacity;
+  final int     capacity;
   final List<Map<String, dynamic>> bookingTypes;
+  final String  openingTime;
+  final String  closingTime;
+  final String? midTime;
 
   Room({
     required this.id,
     required this.name,
     required this.price,
-    required this.address,
     this.imageBase64,
     required this.capacity,
     this.bookingTypes = const [],
+    required this.openingTime,
+    required this.closingTime,
+    this.midTime,
   });
 
   factory Room.fromJson(Map<String, dynamic> json) {
@@ -32,13 +36,15 @@ class Room {
     }
 
     return Room(
-      id: json['id'],
-      name: json['name'],
-      price: roomPrice,
-      address: '',
+      id:          json['id'],
+      name:        json['name'],
+      price:       roomPrice,
       imageBase64: json['image_base64'],
-      capacity: json['capacity'] ?? 0,
+      capacity:    json['capacity'] ?? 0,
       bookingTypes: parsedTypes,
+      openingTime: json['opening_time'] ?? '08:00',
+      closingTime: json['closing_time'] ?? '20:00',
+      midTime:     json['mid_time'],
     );
   }
 }

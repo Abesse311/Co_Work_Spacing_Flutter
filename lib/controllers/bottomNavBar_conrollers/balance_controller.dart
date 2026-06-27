@@ -3,9 +3,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_projet_tutore/models/User_model.dart';
-import 'package:flutter_projet_tutore/variables.dart';
-
+import 'package:flutter_projet_tutore/variable.dart';
+import 'package:flutter_projet_tutore/core/helper/app_snackbar.dart';
 import 'package:flutter_projet_tutore/models/transaction_history.dart';
+import 'package:flutter_projet_tutore/core/localization/translation_keys.dart';
 
 class BalanceController extends GetxController {
   final currentUser = Rxn<User>();
@@ -49,7 +50,7 @@ class BalanceController extends GetxController {
         final userData = json.decode(userResponse.body);
         currentUser.value = User.fromJson(userData);
       } else {
-        Get.snackbar('Erreur', 'Failed to load user data (${userResponse.statusCode})');
+        AppSnackbar.error(TKeys.error.tr, '${TKeys.failedLoadData.tr} (${userResponse.statusCode})');
       }
 
       if (historyResponse.statusCode == 200) {
@@ -61,7 +62,7 @@ class BalanceController extends GetxController {
         print('Failed to load history: ${historyResponse.body}');
       }
     } catch (e) {
-      Get.snackbar('Erreur', 'Impossible de charger les données');
+      AppSnackbar.error(TKeys.error.tr, TKeys.failedLoadData.tr);
     } finally {
       isLoading.value = false;
     }

@@ -1,0 +1,49 @@
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant API as API Server
+    participant DB as Database
+    participant Mail as Email Service
+
+    Note over User,Mail: Diagram 1 — User Registration + Email Verification
+
+    User->>App: Fill in username, email, password
+    App->>App: Validate fields locally
+
+    alt Empty or invalid fields
+        App-->>User: Show validation error
+    else Valid input
+        App->>+API: POST /auth/local/signup
+        Note right of App: Body: {username, email, password}
+
+        API->>DB: Check if email already exists
+
+        alt Email already registered
+            DB-->>API: Email conflict
+            API-->>-App: 400 — Email already used
+            App-->>User: Show error notification
+        else Email is available
+            DB-->>API: Email is free
+            API->>Mail: Send 6-digit OTP to user email
+            Mail-->>User: OTP email delivered
+            API-->>App: 200 — Verification code sent
+            App-->>User: Navigate to Email Verification screen
+
+            Note over User,API: Email Verification Step
+
+            User->>App: Enter 6-digit OTP code
+            App->>+API: POST /auth/local/confirm-email
+            Note right of App: Body: {email, code}
+
+            alt Code invalid or expired
+                API-->>-App: 401 — Invalid verification code
+                App-->>User: Show error — wrong or expired code
+            else Code is valid
+                API->>DB: Create user record in database
+                DB-->>API: User created successfully
+                API-->>App: 200 — {access_token}
+                App->>App: Save JWT to Secure Storage
+                App-->>User: Navigate to Home Screen
+            end
+        end
+    end

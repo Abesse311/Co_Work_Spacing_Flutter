@@ -1,0 +1,56 @@
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 9 — Make a Reservation
+
+    User->>App: Select booking type
+    User->>App: Select date from calendar
+    User->>App: Select time slot(s)
+
+    Note over App: App calculates total price locally
+
+    User->>App: Tap "Confirm Reservation"
+    App-->>User: Show confirmation dialog
+    Note right of App: Displays: type, date, time, total price
+
+    alt User confirms
+        App->>Storage: Read auth_token
+        Storage-->>App: JWT token
+
+        App->>+API: POST /bookings
+        Note right of App: Header: Authorization Bearer token
+        Note right of App: Body: {booking_type_id, date, start_time, end_time}
+
+        API->>DB: Check user balance is sufficient
+        API->>DB: Check slot is still available
+
+        alt Phone number not verified
+            DB-->>API: Phone missing
+            API-->>App: 4xx — Phone verification required
+            App-->>User: Show error: verify phone number in settings
+        else Insufficient balance
+            DB-->>API: Balance too low
+            API-->>App: 402 — Insufficient balance
+            App-->>User: Show insufficient balance error
+        else Slot already taken (race condition)
+            DB-->>API: Slot conflict
+            API-->>App: 409 — Time slot no longer available
+            App-->>User: Show slot conflict error
+        else Booking successful
+            DB->>DB: Deduct price from user balance
+            DB->>DB: Create booking record
+            DB-->>API: Booking created
+            API-->>App: 200 — Booking confirmed
+            App-->>User: Show success notification
+            App->>App: Clear calendar selections
+            App->>+API: GET /bookings/occupied-slots
+            API-->>App: Updated availability data
+            App-->>User: Refresh calendar view
+        end
+    else User cancels
+        App-->>User: Cancel reservation
+    end

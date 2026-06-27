@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_projet_tutore/core/localization/translation_keys.dart';
 
 class SettingsController extends GetxController {
 
@@ -15,11 +16,12 @@ class SettingsController extends GetxController {
     Get.dialog(
       Obx(
         () => AlertDialog(
-          title: const Text('Notifications'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(TKeys.notifications.tr,style: Theme.of(Get.context!).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold,color: Colors.black)),
           content: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Allow Notifications'),
+              Text(TKeys.allowNotifications.tr),
               Switch(
                 value: isEnabled.value,
                 onChanged: (value) => isEnabled.value = value,
@@ -29,7 +31,7 @@ class SettingsController extends GetxController {
           actions: [
             TextButton(
               onPressed: () => Get.back(),
-              child: const Text('Close'),
+              child: Text(TKeys.close.tr),
             ),
           ],
         ),
@@ -37,17 +39,20 @@ class SettingsController extends GetxController {
     );
   }
 
+  // Theme.of(Get.context!).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold,color: Colors.black),
+
   void showHelpDialog() {
     Get.dialog(
       AlertDialog(
-        title: const Text('Contact Us'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(TKeys.contactUs.tr,style: Theme.of(Get.context!).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold,color: Colors.black)), 
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Image.asset('icons/logo.png', width: 24, height: 24),
+                Image.asset('icons/whatsapp.png', width: 24, height: 24),
                 const SizedBox(width: 8),
                 const Text('WhatsApp: 0533000001'),
               ],
@@ -63,9 +68,43 @@ class SettingsController extends GetxController {
           ],
         ),
         actions: [
+          TextButton( 
+            onPressed: () => Get.back(),
+            child: Text(TKeys.close.tr),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showCancellationRefundDialog() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Expanded(
+          child: Text(
+            TKeys.cancellationRefundPolicy.tr,
+            style: Theme.of(Get.context!).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,color: Colors.black
+                ), // Theme.of(Get.context!).textTheme.bodyLarge
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,  
+          children: [
+            Text(
+              TKeys.cancellationRefundContent.tr,
+              style: Theme.of(Get.context!).textTheme.bodyMedium?.copyWith(
+                    height: 1.5,
+                  ),
+            ),
+          ],
+        ),
+        actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Close'),
+            child: Text(TKeys.close.tr),
           ),
         ],
       ),
@@ -75,18 +114,20 @@ class SettingsController extends GetxController {
   void showLogoutDialog() {
     Get.dialog(
       AlertDialog(
-        title: const Text('Disconnect'),
-        content: const Text('Are you sure you want to disconnect?'),
+        title: Text(TKeys.disconnect.tr,style: Theme.of(Get.context!).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,color: Colors.black
+                )),
+        content: Text(TKeys.confirmDisconnect.tr),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Cancel'),
+            child: Text(TKeys.cancel.tr),
           ),
           TextButton(
             onPressed: () => logout(),
-            child: const Text(
-              'Disconnect',
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              TKeys.disconnect.tr,
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],
@@ -95,18 +136,16 @@ class SettingsController extends GetxController {
   }
 
   Future<void> logout() async {
-    // Clear the JWT so main.dart won't auto-login on next launch
     const storage = FlutterSecureStorage();
     await storage.delete(key: 'auth_token');
     await storage.delete(key: 'user_id');
+    await storage.delete(key: 'auth_provider');
+    await storage.delete(key: 'has_password');
 
-    // Sign out from Google & Firebase (clears Google session → forces account picker next time)
     try {
       await GoogleSignIn().signOut();
       await FirebaseAuth.instance.signOut();
-    } catch (_) {
-      // If the user wasn't signed in via Google/Firebase, ignore errors
-    }
+    } catch (_) {}
 
     Get.offAllNamed('/login');
   }

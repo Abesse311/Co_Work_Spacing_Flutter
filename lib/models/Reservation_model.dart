@@ -85,7 +85,7 @@ class Reservation {
   ///   - Start datetime must be >= 24 h from now
   bool get canCancel {
     final s = status.toLowerCase();
-    if (s == 'cancelled' || s == 'annulée' || s == 'annule' || s == 'canceled') return false;
+    if (s == 'cancelled' || s == 'annulée') return false;
 
     if (rawDate.isEmpty) return false;
     try {

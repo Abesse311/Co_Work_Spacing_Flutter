@@ -1,0 +1,44 @@
+---
+config:
+  layout: elk
+---
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 2 — Local Sign In
+
+    User->>App: Enter email + password
+    App->>App: Validate fields locally
+
+    alt Empty fields
+        App-->>User: Show validation error
+    else Valid input
+        App->>+API: POST /auth/local/login
+        Note right of App: Body: {email, password}
+
+        API->>DB: Lookup user by email
+
+        alt Account registered via Google
+            DB-->>API: Provider mismatch
+            API-->>App: 400 — Use Google Sign In instead
+            App-->>User: Show provider error message
+        else Wrong email or password
+            DB-->>API: Credentials invalid
+            API-->>App: 401 — Incorrect credentials
+            App-->>User: Show wrong email or password error
+        else Email not verified
+            DB-->>API: Account not confirmed
+            API-->>App: 403 — Email not verified
+            App-->>User: Show email verification required error
+        else Credentials valid
+            DB-->>API: User data retrieved
+            API-->>-App: 200 — {access_token}
+            App->>Storage: Store auth_token securely
+            App->>Storage: Store user_id, auth_provider
+            App-->>User: Navigate to Home Screen
+        end
+    end

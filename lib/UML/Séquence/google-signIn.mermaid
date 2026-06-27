@@ -1,0 +1,43 @@
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Google as Google Sign-In SDK
+    participant Firebase as Firebase Auth
+    participant API as API Server
+    participant Storage as Secure Storage
+    participant DB as Database
+
+    Note over User,DB: Diagram 3 — Google Sign In (Firebase OAuth)
+
+    User->>App: Tap "Sign in with Google"
+    App->>Google: Trigger Google Sign-In flow
+    Google-->>User: Display Google account picker
+
+    User->>Google: Select Google account
+
+    alt User cancels account selection
+        Google-->>App: Sign-in cancelled
+        App-->>User: Stay on login screen
+    else Account selected
+        Google->>+Firebase: Authenticate with Google credentials
+        Firebase-->>-Google: Return Firebase ID Token
+        Google-->>App: Return Firebase ID Token
+
+        App->>API: POST /auth/firebase
+        Note right of App: Body: {firebase_token}
+
+        API->>+Firebase: Verify Firebase ID Token
+        Firebase-->>-API: Verification result
+
+        alt Token is invalid or expired
+            API-->>App: 401 — Invalid Firebase token
+            App-->>User: Show authentication error
+        else Token is valid
+            API->>DB: Find or create user by Firebase UID
+            DB-->>API: User record (new or existing)
+            API-->>App: 200 — {access_token}
+            App->>Storage: Store auth_token securely
+            App->>Storage: Store auth_provider = "google"
+            App-->>User: Navigate to Home Screen
+        end
+    end

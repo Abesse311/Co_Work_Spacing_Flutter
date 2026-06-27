@@ -5,13 +5,17 @@ import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
 class RoomsScreen extends StatelessWidget {
-  final int locationId;
+  final int    locationId;
   final String locationName;
+  final String openingTime;
+  final String closingTime;
 
-  const RoomsScreen({
+   RoomsScreen({
     super.key,
     required this.locationId,
     required this.locationName,
+    this.openingTime = '08:00',
+    this.closingTime = '20:00',
   });
 
   @override
@@ -22,7 +26,8 @@ class RoomsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('$locationName Rooms'),
+        title: Text('$locationName'),
+        centerTitle: false,
         backgroundColor: AppTheme.primaryDark,
       ),
       body: Obx(
@@ -32,7 +37,12 @@ class RoomsScreen extends StatelessWidget {
                 padding: EdgeInsets.all(16),
                 itemCount: controller.rooms.length,
                 itemBuilder: (context, index) {
-                  return RoomItem(room: controller.rooms[index]);
+                  return RoomItem(
+                    room: controller.rooms[index],
+                    locationName: locationName,
+                    openingTime: openingTime,
+                    closingTime: closingTime,
+                  );
                 },
               ),
       ),

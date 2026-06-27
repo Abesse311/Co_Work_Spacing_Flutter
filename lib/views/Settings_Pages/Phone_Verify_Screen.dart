@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_projet_tutore/controllers/settings_controllers/phone_verify_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
+import 'package:flutter_projet_tutore/core/localization/translation_keys.dart';
 
 class PhoneVerifyScreen extends StatelessWidget {
   const PhoneVerifyScreen({Key? key}) : super(key: key);
@@ -13,7 +14,7 @@ class PhoneVerifyScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Verify Phone Number'),
+        title:  Text(TKeys.verifyPhoneNumberTitle.tr),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -38,40 +39,38 @@ class PhoneVerifyScreen extends StatelessWidget {
                     size: 48,
                     color: AppTheme.primary,
                   ),
-                  const SizedBox(height: 12),
+                   SizedBox(height: 12),
                   Text(
-                    'Phone Verification',
+                    TKeys.phoneVerificationHeader.tr,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  const SizedBox(height: 8),
+                   SizedBox(height: 8),
                   Text(
-                    'A verified phone number is required to make bookings. '
-                    'We\'ll send you a verification code via SMS.',
+                    TKeys.phoneVerificationDesc.tr,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                      height: 1.4,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.black54,
+                          height: 1.4,
+                        ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 28),
+             SizedBox(height: 28),
 
             // ── Phone number input ────────────────────────────────────────
             Text(
-              'Phone Number',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
+              TKeys.phoneNumberLabel.tr,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
             ),
-            const SizedBox(height: 8),
+             SizedBox(height: 8),
             Obx(
               () => Container(
                 decoration: AppTheme.inputDecoration,
@@ -84,7 +83,7 @@ class PhoneVerifyScreen extends StatelessWidget {
                     LengthLimitingTextInputFormatter(12),
                   ],
                   decoration: InputDecoration(
-                    hintText: 'Enter your phone number',
+                    hintText: TKeys.enterPhoneNumberHint.tr,
                     prefixIcon: Icon(
                       Icons.phone,
                       color: AppTheme.textSecondary,
@@ -94,7 +93,7 @@ class PhoneVerifyScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+             SizedBox(height: 16),
 
             // ── Send Code button ──────────────────────────────────────────
             Obx(
@@ -115,7 +114,7 @@ class PhoneVerifyScreen extends StatelessWidget {
                                 ),
                               )
                             : Text(
-                                'Send Verification Code',
+                                TKeys.sendVerificationCodeBtn.tr,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                       ),
@@ -125,14 +124,14 @@ class PhoneVerifyScreen extends StatelessWidget {
                       children: [
                         // ── Code input ────────────────────────────────────
                         Text(
-                          'Verification Code',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
+                          TKeys.verificationCodeLabel.tr,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
                         ),
-                        const SizedBox(height: 8),
+                         SizedBox(height: 8),
                         Container(
                           decoration: AppTheme.inputDecoration,
                           child: TextField(
@@ -143,7 +142,7 @@ class PhoneVerifyScreen extends StatelessWidget {
                               LengthLimitingTextInputFormatter(6),
                             ],
                             decoration: InputDecoration(
-                              hintText: 'Enter the code',
+                              hintText: TKeys.enterCodeHint.tr,
                               prefixIcon: Icon(
                                 Icons.lock_outline,
                                 color: AppTheme.textSecondary,
@@ -152,7 +151,7 @@ class PhoneVerifyScreen extends StatelessWidget {
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                         SizedBox(height: 20),
 
                         // ── Verify button ─────────────────────────────────
                         SizedBox(
@@ -171,14 +170,14 @@ class PhoneVerifyScreen extends StatelessWidget {
                                     ),
                                   )
                                 : Text(
-                                    'Verify Phone',
+                                    TKeys.verifyPhoneBtn.tr,
                                     style:
                                         Theme.of(context).textTheme.titleMedium,
                                   ),
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                         SizedBox(height: 12),
 
                         // ── Resend / Change number ────────────────────────
                         Row(
@@ -189,11 +188,11 @@ class PhoneVerifyScreen extends StatelessWidget {
                                   ? null
                                   : controller.sendCode,
                               child: Text(
-                                'Resend Code',
-                                style: TextStyle(
-                                  color: AppTheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                TKeys.resendCodeBtn.tr,
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: AppTheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ),
                             TextButton(
@@ -202,11 +201,11 @@ class PhoneVerifyScreen extends StatelessWidget {
                                 controller.codeController.clear();
                               },
                               child: Text(
-                                'Change Number',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                TKeys.changeNumberBtn.tr,
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: Colors.grey[600],
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ),
                           ],

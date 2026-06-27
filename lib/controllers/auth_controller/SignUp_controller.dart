@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/services/auth_service.dart';
-import 'package:flutter_projet_tutore/core/helper/auth_snackbar.dart';
+import 'package:flutter_projet_tutore/core/helper/app_snackbar.dart';
+import 'package:flutter_projet_tutore/core/localization/translation_keys.dart';
 
 class Auth_SignUp_Controller extends GetxController {
   // ── Form controllers ───────────────────────────────────────────────────────
@@ -27,17 +28,17 @@ class Auth_SignUp_Controller extends GetxController {
     final email    = registerEmailController.text.trim();
     final password = registerPasswordController.text.trim();
 
-    // ── Frontend validation (empty / format / strength only) ──────────────
+    // ── Frontend validation ────────────────────────────────────────────────
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      AuthSnackbar.error('Empty Fields', 'Please fill in all required fields.');
+      AppSnackbar.error(TKeys.emptyFields.tr, TKeys.fillAllRequiredFields.tr);
       return;
     }
     if (!GetUtils.isEmail(email)) {
-      AuthSnackbar.error('Invalid Email', 'Please enter a valid email address.');
+      AppSnackbar.error(TKeys.invalidEmail.tr, TKeys.pleaseEnterValidEmail.tr);
       return;
     }
     if (password.length < 8) {
-      AuthSnackbar.error('Weak Password', 'Password must be at least 8 characters.');
+      AppSnackbar.error(TKeys.weakPassword.tr, TKeys.passwordMin8Chars.tr);
       return;
     }
 
@@ -58,23 +59,20 @@ class Auth_SignUp_Controller extends GetxController {
       return;
     }
 
-    // ── Backend business errors (source: error_codes_per_route.md) ──────────
+    // ── Backend business errors ────────────────────────────────────────────
     switch (result['statusCode'] as int? ?? 0) {
       case 400:
-        AuthSnackbar.error('Email Already Used',
-            'An account with this email already exists. Please sign in.');
+        AppSnackbar.error(TKeys.emailAlreadyUsed.tr, TKeys.emailAlreadyExists.tr);
         break;
       case 422:
-        AuthSnackbar.error('Invalid Data',
-            'Please check your inputs and try again.');
+        AppSnackbar.error(TKeys.invalidData.tr, TKeys.checkInputsTryAgain.tr);
         break;
       case 500:
-        AuthSnackbar.error('Email Error',
-            'We could not send the verification email. Please try again later.');
+        AppSnackbar.error(TKeys.emailError.tr, TKeys.couldNotSendVerificationEmail.tr);
         break;
       default:
-        AuthSnackbar.error('Sign Up Failed',
-            result['message'] ?? 'An error occurred. Please try again.');
+        AppSnackbar.error(TKeys.signUpFailed.tr,
+            result['message'] ?? TKeys.anErrorOccurred.tr);
     }
   }
 

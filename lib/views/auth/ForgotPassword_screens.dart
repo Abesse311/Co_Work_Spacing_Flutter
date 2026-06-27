@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/ForgotPassword_controller.dart';
+import 'package:flutter_projet_tutore/core/localization/translation_keys.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -34,7 +35,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 24),
+                     SizedBox(height: 24),
                     Text(
                       'Forgot Password',
                       style: Theme.of(context)
@@ -42,12 +43,12 @@ class ForgotPasswordScreen extends StatelessWidget {
                           .headlineLarge
                           ?.copyWith(color: Colors.black, fontFamily: 'roboto'),
                     ),
-                    const SizedBox(height: 8),
+                     SizedBox(height: 8),
                     Text(
                       'Enter your email address and we will send you a reset code.',
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
-                    const SizedBox(height: 28),
+                     SizedBox(height: 28),
 
                     // Email field
                     Container(
@@ -55,7 +56,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                       child: TextField(
                         controller: c.emailCtrl,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
+                        decoration:  InputDecoration(
                           hintText: 'Email',
                           prefixIcon: Icon(
                             Icons.email_outlined,
@@ -65,7 +66,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                     SizedBox(height: 24),
 
                     // Send Code button
                     Obx(() => SizedBox(
@@ -74,7 +75,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                             onPressed:
                                 c.isLoading.value ? null : c.sendCode,
                             child: c.isLoading.value
-                                ? const SizedBox(
+                                ?  SizedBox(
                                     height: 20,
                                     width: 20,
                                     child: CircularProgressIndicator(
@@ -82,11 +83,11 @@ class ForgotPasswordScreen extends StatelessWidget {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text('Send Code'),
+                                :  Text(TKeys.sendCodeBtn.tr),
                           ),
                         )),
 
-                    const SizedBox(height: 16),
+                     SizedBox(height: 16),
 
                     // Back to login
                     Center(
@@ -116,7 +117,7 @@ class ForgotPasswordScreen extends StatelessWidget {
 // Screen 2 — Enter Verification Code
 // ─────────────────────────────────────────────────────────────────────────────
 class VerifyResetCodeScreen extends StatelessWidget {
-  const VerifyResetCodeScreen({super.key});
+   VerifyResetCodeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +144,7 @@ class VerifyResetCodeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 24),
+                     SizedBox(height: 24),
                     Text(
                       'Enter Code',
                       style: Theme.of(context)
@@ -151,12 +152,12 @@ class VerifyResetCodeScreen extends StatelessWidget {
                           .headlineLarge
                           ?.copyWith(color: Colors.black, fontFamily: 'roboto'),
                     ),
-                    const SizedBox(height: 8),
+                     SizedBox(height: 8),
                     Text(
                       'A verification code was sent to\n$email',
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
-                    const SizedBox(height: 28),
+                     SizedBox(height: 28),
 
                     // Code field
                     Container(
@@ -165,12 +166,12 @@ class VerifyResetCodeScreen extends StatelessWidget {
                         controller: c.codeCtrl,
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 8,
                         ),
-                        decoration: const InputDecoration(
+                        decoration:  InputDecoration(
                           hintText: '------',
                           prefixIcon: Icon(
                             Icons.lock_clock_outlined,
@@ -180,7 +181,7 @@ class VerifyResetCodeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                     SizedBox(height: 24),
 
                     // Verify button
                     Obx(() => SizedBox(
@@ -189,7 +190,7 @@ class VerifyResetCodeScreen extends StatelessWidget {
                             onPressed:
                                 c.isLoading.value ? null : c.verifyCode,
                             child: c.isLoading.value
-                                ? const SizedBox(
+                                ?  SizedBox(
                                     height: 20,
                                     width: 20,
                                     child: CircularProgressIndicator(
@@ -197,11 +198,11 @@ class VerifyResetCodeScreen extends StatelessWidget {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text('Verify Code'),
+                                :  Text(TKeys.verifyCodeBtn.tr),
                           ),
                         )),
 
-                    const SizedBox(height: 16),
+                     SizedBox(height: 16),
 
                     Center(
                       child: TextButton(
@@ -230,7 +231,7 @@ class VerifyResetCodeScreen extends StatelessWidget {
 // Screen 3 — Set New Password
 // ─────────────────────────────────────────────────────────────────────────────
 class ResetPasswordScreen extends StatelessWidget {
-  const ResetPasswordScreen({super.key});
+   ResetPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +257,7 @@ class ResetPasswordScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 24),
+                     SizedBox(height: 24),
                     Text(
                       'New Password',
                       style: Theme.of(context)
@@ -264,12 +265,12 @@ class ResetPasswordScreen extends StatelessWidget {
                           .headlineLarge
                           ?.copyWith(color: Colors.black, fontFamily: 'roboto'),
                     ),
-                    const SizedBox(height: 8),
+                     SizedBox(height: 8),
                     Text(
                       'Create a new password for your account.',
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
-                    const SizedBox(height: 28),
+                     SizedBox(height: 28),
 
                     // New password field
                     Obx(() => Container(
@@ -279,7 +280,7 @@ class ResetPasswordScreen extends StatelessWidget {
                             obscureText: c.obscurePassword.value,
                             decoration: InputDecoration(
                               hintText: 'New password',
-                              prefixIcon: const Icon(
+                              prefixIcon:  Icon(
                                 Icons.lock_outline,
                                 color: AppTheme.textSecondary,
                               ),
@@ -296,7 +297,7 @@ class ResetPasswordScreen extends StatelessWidget {
                           ),
                         )),
 
-                    const SizedBox(height: 16),
+                     SizedBox(height: 16),
 
                     // Confirm password field
                     Obx(() => Container(
@@ -306,7 +307,7 @@ class ResetPasswordScreen extends StatelessWidget {
                             obscureText: c.obscureConfirm.value,
                             decoration: InputDecoration(
                               hintText: 'Confirm password',
-                              prefixIcon: const Icon(
+                              prefixIcon:  Icon(
                                 Icons.lock_outline,
                                 color: AppTheme.textSecondary,
                               ),
@@ -323,7 +324,7 @@ class ResetPasswordScreen extends StatelessWidget {
                           ),
                         )),
 
-                    const SizedBox(height: 24),
+                     SizedBox(height: 24),
 
                     // Reset button
                     Obx(() => SizedBox(
@@ -333,7 +334,7 @@ class ResetPasswordScreen extends StatelessWidget {
                                 ? null
                                 : c.resetPassword,
                             child: c.isLoading.value
-                                ? const SizedBox(
+                                ?  SizedBox(
                                     height: 20,
                                     width: 20,
                                     child: CircularProgressIndicator(
@@ -341,7 +342,7 @@ class ResetPasswordScreen extends StatelessWidget {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text('Reset Password'),
+                                :  Text(TKeys.resetPasswordBtn.tr),
                           ),
                         )),
                   ],

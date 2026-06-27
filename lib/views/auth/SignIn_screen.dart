@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignIn_controller.dart';
+import 'package:flutter_projet_tutore/core/localization/translation_keys.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
@@ -116,17 +117,26 @@ class LoginScreen extends StatelessWidget {
 
                  /////////////////////////////// Login button 
 
-                Padding(
+                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14.0),
                   child: SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: controller.authEmail_Password,
-                      child: Text(
-                        'Log in',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
+                    child: Obx(() => ElevatedButton(
+                      onPressed: controller.isLoginLoading.value ? null : controller.authEmail_Password,
+                      child: controller.isLoginLoading.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              TKeys.logInBtn.tr,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                    )),
                   ),
                 ),
 
@@ -140,8 +150,8 @@ class LoginScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 14.0),
                   child: SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: controller.signInWithGoogle,
+                    child: Obx(() => ElevatedButton(
+                      onPressed: controller.isGoogleLoading.value ? null : controller.signInWithGoogle,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.backgroundLight,
                         foregroundColor: AppTheme.textPrimary,
@@ -151,18 +161,29 @@ class LoginScreen extends StatelessWidget {
                           side: BorderSide(color: AppTheme.border),
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset('icons/google.svg'),
-                          SizedBox(width: 8),
-                          Text(
-                            'Continue with Google',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black),
-                          ),
-                        ],
-                      ),
-                    ),
+                      child: controller.isGoogleLoading.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppTheme.primary,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset('icons/google.svg'),
+                                const SizedBox(width: 8),
+                                Text(
+                                  TKeys.continueWithGoogleBtn.tr,
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    )),
                   ),
                 ),
 
@@ -172,13 +193,13 @@ class LoginScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                      Text(
-                      "Don't have an account? ",
+                      TKeys.dontHaveAccount.tr,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     GestureDetector(
                       onTap: () => Get.toNamed('/register'),
                       child:  Text(
-                        'Register',
+                        TKeys.registerBtn.tr,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold,
                           color: AppTheme.primary,)
                         

@@ -1,0 +1,60 @@
+graph LR
+    %% Actor Definition
+    User["👤 User"]
+    %% System Boundary
+    subgraph CoWorkingSpaceApp["System Boundary: Co-Working Space App"]
+        
+        %% Authentication & Session Management
+        subgraph AuthenticationModule["Authentication & Session"]
+            UC_SignUp("Sign Up / Register")
+            UC_SignIn("Sign In / Log In")
+            UC_GoogleAuth("Authenticate with Google")
+            UC_ResetPassword("Reset Password")
+            UC_VerifyEmail("Verify Email Address")
+        end
+        %% Profile Management
+        subgraph ProfileModule["Profile Management"]
+            UC_UpdateProfile("Update Profile Info")
+            UC_VerifyPhone("Verify Phone Number via SMS")
+            UC_ChangeEmail("Change Registered Email")
+            UC_ChangePassword("Update Account Password")
+        end
+        %% Booking Operations
+        subgraph BookingModule["Booking Operations"]
+            UC_BrowseLocations("Browse Co-Working Locations")
+            UC_ViewRooms("View Room Details & Capacity")
+            UC_CheckAvailability("Check Room Slot Availability")
+            UC_BookRoom("Book Co-Working Room")
+            UC_ViewReservations("View Booking History")
+            UC_CancelBooking("Cancel Reservation")
+        end
+        %% Balance & Payments
+        subgraph WalletModule["Wallet & Transactions"]
+            UC_ViewBalance("Check Account Balance")
+            UC_ViewTransactions("View Transaction History")
+        end
+    end
+    %% Actor Relationships (Associations)
+    User --> UC_SignUp
+    User --> UC_SignIn
+    User --> UC_GoogleAuth
+    User --> UC_ResetPassword
+    User --> UC_VerifyEmail
+    User --> UC_UpdateProfile
+    User --> UC_VerifyPhone
+    User --> UC_ChangeEmail
+    User --> UC_ChangePassword
+    User --> UC_BrowseLocations
+    User --> UC_ViewRooms
+    User --> UC_CheckAvailability
+    User --> UC_BookRoom
+    User --> UC_ViewReservations
+    User --> UC_CancelBooking
+    User --> UC_ViewBalance
+    User --> UC_ViewTransactions
+    %% Use Case Relationships (Includes / Extends)
+    UC_SignUp -.->|include| UC_VerifyEmail
+    UC_BookRoom -.->|include| UC_CheckAvailability
+    UC_ChangeEmail -.->|include| UC_VerifyEmail
+    UC_VerifyPhone -.->|include| UC_SignIn
+    UC_BookRoom -.->|include| UC_VerifyPhone

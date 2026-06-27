@@ -1,0 +1,248 @@
+%% ============================================================
+%%  AUTHENTICATION SEQUENCE DIAGRAMS
+%%  Co-Working Space Application
+%%  Scenarios: Registration, Sign In, Google Sign In, Forgot Password
+%% ============================================================
+
+
+%% ============================================================
+%%  DIAGRAM 1 — User Registration + Email Verification
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant API as API Server
+    participant DB as Database
+    participant Mail as Email Service
+
+    Note over User,Mail: Diagram 1 — User Registration + Email Verification
+
+    User->>App: Fill in username, email, password
+    App->>App: Validate fields locally
+
+    alt Empty or invalid fields
+        App-->>User: Show validation error
+    else Valid input
+        App->>+API: POST /auth/local/signup
+        Note right of App: Body: {username, email, password}
+
+        API->>DB: Check if email already exists
+
+        alt Email already registered
+            DB-->>API: Email conflict
+            API-->>-App: 400 — Email already used
+            App-->>User: Show error notification
+        else Email is available
+            DB-->>API: Email is free
+            API->>Mail: Send 6-digit OTP to user email
+            Mail-->>User: OTP email delivered
+            API-->>-App: 200 — Verification code sent
+            App-->>User: Navigate to Email Verification screen
+
+            Note over User,API: Email Verification Step
+
+            User->>App: Enter 6-digit OTP code
+            App->>+API: POST /auth/local/confirm-email
+            Note right of App: Body: {email, code}
+
+            alt Code invalid or expired
+                API-->>-App: 401 — Invalid verification code
+                App-->>User: Show error — wrong or expired code
+            else Code is valid
+                API->>DB: Create user record in database
+                DB-->>API: User created successfully
+                API-->>-App: 200 — {access_token}
+                App->>App: Save JWT to Secure Storage
+                App-->>User: Navigate to Home Screen
+            end
+        end
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 2 — Local Sign In (Email + Password)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 2 — Local Sign In
+
+    User->>App: Enter email + password
+    App->>App: Validate fields locally
+
+    alt Empty fields
+        App-->>User: Show validation error
+    else Valid input
+        App->>+API: POST /auth/local/login
+        Note right of App: Body: {email, password}
+
+        API->>DB: Lookup user by email
+
+        alt Account registered via Google
+            DB-->>API: Provider mismatch
+            API-->>-App: 400 — Use Google Sign In instead
+            App-->>User: Show provider error message
+        else Wrong email or password
+            DB-->>API: Credentials invalid
+            API-->>-App: 401 — Incorrect credentials
+            App-->>User: Show wrong email or password error
+        else Email not verified
+            DB-->>API: Account not confirmed
+            API-->>-App: 403 — Email not verified
+            App-->>User: Show email verification required error
+        else Credentials valid
+            DB-->>API: User data retrieved
+            API-->>-App: 200 — {access_token}
+            App->>Storage: Store auth_token securely
+            App->>Storage: Store user_id, auth_provider
+            App-->>User: Navigate to Home Screen
+        end
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 3 — Google Sign In (Firebase OAuth)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Google as Google Sign-In SDK
+    participant Firebase as Firebase Auth
+    participant API as API Server
+    participant Storage as Secure Storage
+    participant DB as Database
+
+    Note over User,DB: Diagram 3 — Google Sign In (Firebase OAuth)
+
+    User->>App: Tap "Sign in with Google"
+    App->>+Google: Trigger Google Sign-In flow
+    Google-->>User: Display Google account picker
+
+    User->>Google: Select Google account
+
+    alt User cancels account selection
+        Google-->>-App: Sign-in cancelled
+        App-->>User: Stay on login screen
+    else Account selected
+        Google->>+Firebase: Authenticate with Google credentials
+        Firebase-->>-Google: Return Firebase ID Token
+        Google-->>-App: Return Firebase ID Token
+
+        App->>+API: POST /auth/firebase
+        Note right of App: Body: {firebase_token}
+
+        API->>+Firebase: Verify Firebase ID Token
+        Firebase-->>-API: Verification result
+
+        alt Token is invalid or expired
+            API-->>-App: 401 — Invalid Firebase token
+            App-->>User: Show authentication error
+        else Token is valid
+            API->>DB: Find or create user by Firebase UID
+            DB-->>API: User record (new or existing)
+            API-->>-App: 200 — {access_token}
+            App->>Storage: Store auth_token securely
+            App->>Storage: Store auth_provider = "google"
+            App-->>User: Navigate to Home Screen
+        end
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 4 — Forgot Password (3-Step Flow)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant API as API Server
+    participant DB as Database
+    participant Mail as Email Service
+
+    Note over User,Mail: Diagram 4 — Forgot Password (3-Step Flow)
+
+    %% ── Step 1: Request Reset Code ────────────────────────
+    Note over User,Mail: Step 1 — Request Reset Code
+
+    User->>App: Enter registered email address
+    App->>+API: POST /auth/local/forgot-password
+    Note right of App: Body: {email}
+
+    API->>DB: Lookup user by email
+
+    alt No user found with this email
+        DB-->>API: User not found
+        API-->>-App: 404 — No account with this email
+        App-->>User: Show not found error
+    else Email service failure
+        API-->>-App: 500 — Failed to send reset email
+        App-->>User: Show service error — try again later
+    else User found
+        DB-->>API: User record exists
+        API->>Mail: Send 6-digit reset code to email
+        Mail-->>User: Reset code email delivered
+        API-->>-App: 200 — Reset code sent successfully
+        App-->>User: Navigate to Verify Code screen
+
+        %% ── Step 2: Verify Reset Code ─────────────────────
+        Note over User,API: Step 2 — Verify Reset Code
+
+        User->>App: Enter 6-digit reset code
+        App->>+API: POST /auth/local/verify-reset-code
+        Note right of App: Body: {email, code}
+
+        API->>DB: Validate code against stored record
+
+        alt No reset code found for this email
+            DB-->>API: No pending reset
+            API-->>-App: 400 — No reset code found
+            App-->>User: Show error — request a new code
+        else Reset code is invalid
+            DB-->>API: Code mismatch
+            API-->>-App: 401 — Invalid reset code
+            App-->>User: Show wrong code error
+        else Code is valid
+            DB-->>API: Code validated
+            API-->>-App: 200 — {reset_token}
+            App->>App: Store reset_token temporarily in memory
+            App-->>User: Navigate to New Password screen
+
+            %% ── Step 3: Submit New Password ───────────────
+            Note over User,DB: Step 3 — Submit New Password
+
+            User->>App: Enter new password and confirm password
+            App->>App: Validate: match + minimum 8 characters
+
+            alt Passwords do not match
+                App-->>User: Show mismatch validation error
+            else Password too short
+                App-->>User: Show minimum length error
+            else Password is valid
+                App->>+API: POST /auth/local/reset-password
+                Note right of App: Body: {email, token, new_password}
+
+                API->>DB: Validate reset_token and update password
+
+                alt Reset token invalid or expired
+                    DB-->>API: Token mismatch
+                    API-->>-App: 401 — Invalid or expired reset token
+                    App-->>User: Show token error — start over
+                else User not found
+                    DB-->>API: User missing
+                    API-->>-App: 404 — User not found
+                    App-->>User: Show account error
+                else Password reset successful
+                    DB-->>API: Password updated in database
+                    API-->>-App: 200 — Password changed successfully
+                    App-->>User: Navigate to Sign In screen
+                end
+            end
+        end
+    end

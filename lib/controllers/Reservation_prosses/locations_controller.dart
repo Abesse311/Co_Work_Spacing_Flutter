@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_projet_tutore/models/location_model.dart';
-import 'package:flutter_projet_tutore/variables.dart';
+import 'package:flutter_projet_tutore/variable.dart';
+import 'package:flutter_projet_tutore/core/helper/app_snackbar.dart';
 
 class LocationsController extends GetxController {
   final locations = <LocationData>[].obs;
@@ -25,10 +26,10 @@ class LocationsController extends GetxController {
             .map((item) => LocationData.fromJson(item))
             .toList();
       } else {
-        Get.snackbar('Erreur', 'Impossible de charger les locations');
+        AppSnackbar.error('Erreur', 'Impossible de charger les locations');
       }
     } catch (e) {
-      Get.snackbar('Erreur', 'Problème de connexion');
+      AppSnackbar.error('Erreur', 'Problème de connexion');
     } finally {
       isLoading.value = false;
     }
@@ -38,8 +39,11 @@ class LocationsController extends GetxController {
     Get.toNamed(
       '/rooms',
       arguments: {
-        'locationId': location.id,
+        'locationId':   location.id,
         'locationName': location.name,
+        'openingTime':  location.openingTime,
+        'closingTime':  location.closingTime,
+        'midTime':      location.midTime,
       },
     );
   }

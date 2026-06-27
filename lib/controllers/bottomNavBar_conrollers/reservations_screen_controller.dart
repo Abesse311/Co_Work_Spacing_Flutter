@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_projet_tutore/variables.dart';
+import 'package:flutter_projet_tutore/variable.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignIn_controller.dart';
+import 'package:flutter_projet_tutore/core/helper/app_snackbar.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_projet_tutore/models/reservation_model.dart';
+import 'package:flutter_projet_tutore/core/localization/translation_keys.dart';
 
 class ReservationsController extends GetxController {
   final reservations = <Reservation>[].obs;
@@ -32,10 +34,10 @@ class ReservationsController extends GetxController {
         final List<dynamic> data = json.decode(response.body);
         reservations.value = data.map((item) => Reservation.fromJson(item)).toList();
       } else {
-        Get.snackbar('Erreur', 'Impossible de charger les réservations');
+        AppSnackbar.error(TKeys.error.tr, TKeys.failedLoadReservations.tr);
       }
     } catch (e) {
-      Get.snackbar('Erreur', 'Problème de connexion');
+      AppSnackbar.error(TKeys.error.tr, TKeys.connectionProblem.tr);
     } finally {
       isLoading.value = false;
     }
@@ -45,31 +47,26 @@ class ReservationsController extends GetxController {
   Future<void> cancelReservation(Reservation reservation) async {
     // Client-side 24h guard (belt-and-suspenders)
     if (!reservation.canCancel) {
-      _snack(
-        'Cannot Cancel',
-        'Cancellations must be made at least 24 hours before the reservation start time.',
-        isError: true,
-      );
+      AppSnackbar.error(TKeys.cannotCancel.tr, TKeys.cancel24hRule.tr);
       return;
     }
 
     // Confirm dialog
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
-        title: const Text('Cancel Reservation'),
+        title: Text(TKeys.cancelReservation.tr),
         content: Text(
-          'Are you sure you want to cancel your reservation for "${reservation.title}"?\n\n'
-          'You will receive a 50% refund.',
+          TKeys.cancelConfirmMsg.tr.replaceAll('@title', reservation.title),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text('No, keep it'),
+            child: Text(TKeys.noKeepIt.tr),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Get.back(result: true),
-            child: const Text('Yes, cancel', style: TextStyle(color: Colors.white)),
+            child: Text(TKeys.yesCancel.tr, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -79,7 +76,7 @@ class ReservationsController extends GetxController {
 
     final token = await Auth_SignIn_Controller.getToken();
     if (token == null || token.isEmpty) {
-      _snack('Not Authenticated', 'Please log in again.');
+      AppSnackbar.error(TKeys.notAuthenticated.tr, TKeys.pleaseLogInAgain.tr);
       return;
     }
 
@@ -92,23 +89,23 @@ class ReservationsController extends GetxController {
       final body = _safeDecodeBody(response.body);
 
       if (response.statusCode == 200) {
-        _snack('Cancelled', 'Your reservation has been cancelled. 50% refunded.', isError: false);
+        AppSnackbar.success(TKeys.cancelledTitle.tr, TKeys.reservationCancelled50.tr);
         await fetchReservations(); // refresh the list
       } else if (response.statusCode == 409) {
-        _snack('Too Late', body['error'] ?? 'Cannot cancel within 24h of the start time.');
+        AppSnackbar.error(TKeys.tooLate.tr, body['error'] ?? TKeys.cannotCancel24h.tr);
       } else if (response.statusCode == 403) {
-        _snack('Access Denied', body['error'] ?? 'This reservation does not belong to you.');
+        AppSnackbar.error(TKeys.accessDenied.tr, body['error'] ?? TKeys.reservationNotYours.tr);
       } else if (response.statusCode == 404) {
-        _snack('Not Found', body['error'] ?? 'Reservation not found.');
+        AppSnackbar.error(TKeys.notFound.tr, body['error'] ?? TKeys.reservationNotFound.tr);
       } else if (response.statusCode == 400) {
-        _snack('Already Cancelled', body['error'] ?? 'This reservation is already cancelled.');
+        AppSnackbar.error(TKeys.alreadyCancelled.tr, body['error'] ?? TKeys.reservationAlreadyCancelled.tr);
       } else if (response.statusCode == 401) {
-        _snack('Unauthorized', 'Your session has expired. Please log in again.');
+        AppSnackbar.error(TKeys.unauthorized.tr, TKeys.sessionExpired.tr);
       } else {
-        _snack('Error', body['error'] ?? body['detail'] ?? 'Failed to cancel reservation.');
+        AppSnackbar.error(TKeys.error.tr, body['error'] ?? body['detail'] ?? TKeys.failedCancelReservation.tr);
       }
     } catch (_) {
-      _snack('Connection Error', 'Please check your internet connection and try again.');
+      AppSnackbar.error(TKeys.connectionError.tr, TKeys.checkInternetConnection.tr);
     }
   }
 
@@ -119,20 +116,5 @@ class ReservationsController extends GetxController {
     } catch (_) {
       return {};
     }
-  }
-
-  void _snack(String title, String message, {bool isError = true}) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 4),
-      backgroundColor: isError
-          ? const Color(0xFFAA2213).withValues(alpha: 0.9)
-          : const Color(0xFF2E6845).withValues(alpha: 0.9),
-      colorText: Colors.white,
-      margin: const EdgeInsets.all(12),
-      borderRadius: 12,
-    );
   }
 }

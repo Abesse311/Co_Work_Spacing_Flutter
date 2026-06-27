@@ -1,0 +1,370 @@
+%% ============================================================
+%%  PROFILE & BALANCE SEQUENCE DIAGRAMS
+%%  Co-Working Space Application
+%%  Scenarios: Balance, Username, Password, Email, Phone
+%% ============================================================
+
+
+%% ============================================================
+%%  DIAGRAM 12 — View Balance and Transaction History
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 12 — View Balance and Transaction History
+
+    User->>App: Navigate to Balance tab
+    App->>Storage: Read auth_token
+    Storage-->>App: JWT token
+
+    par Fetch user profile (balance)
+        App->>+API: GET /me
+        Note right of App: Header: Authorization Bearer token
+        API->>DB: Fetch user record by token
+        DB-->>API: User data with current balance
+        API-->>-App: 200 — {name, email, balance, ...}
+        App-->>User: Display current balance card
+    and Fetch transaction history
+        App->>+API: GET /me/balance-history
+        Note right of App: Header: Authorization Bearer token
+        API->>DB: Fetch all balance transactions for user
+        DB-->>API: List of transactions
+        API-->>-App: 200 — [{type, amount, room, date, ...}]
+        App->>App: Parse and convert timestamps to local timezone
+        App-->>User: Display transaction history list
+    end
+
+    alt Token expired
+        API-->>-App: 401 — Unauthorized
+        App-->>User: Show session expired error
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 13 — Manual Balance Recharge (CCP / Algérie Poste)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Clipboard as Clipboard Service
+    participant CCP as Algérie Poste (External)
+    participant Email as Company Email
+    participant Admin as Admin Panel
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 13 — Manual Balance Recharge (Offline Flow)
+
+    User->>App: View Balance screen recharge instructions
+    App-->>User: Display CCP account details card
+    Note right of App: Shows: account number, name, address, RIP
+
+    User->>App: Tap copy icon next to account number
+    App->>Clipboard: Copy account number to clipboard
+    Clipboard-->>App: Copied
+    App-->>User: Show "Copied to clipboard" confirmation
+
+    User->>CCP: Perform money transfer via postal account
+    CCP-->>User: Transfer receipt issued
+
+    User->>Email: Send payment receipt to company email
+    Note right of User: Email provided in the app instructions
+
+    Admin->>Admin: Verify payment receipt manually
+    Admin->>+API: POST /admin/users/f_balance/{user_uid}
+    Note right of Admin: Body: {balance: amount}
+    API->>DB: Add credited amount to user balance
+    DB-->>API: Balance updated
+    API-->>-Admin: 200 — Balance updated
+
+    Note over User,DB: User sees updated balance on next app open or refresh
+
+
+%% ============================================================
+%%  DIAGRAM 14 — View Account Settings (Profile)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 14 — View Account Settings
+
+    User->>App: Navigate to Account tab → Account Settings
+    App->>Storage: Read auth_token + auth_provider + has_password flag
+    Storage-->>App: Stored credentials metadata
+
+    App->>+API: GET /me
+    Note right of App: Header: Authorization Bearer token
+    API->>DB: Fetch complete user profile
+    DB-->>API: {name, email, phone, has_password, ...}
+
+    alt Token invalid or expired
+        API-->>-App: 401 — Unauthorized
+        App-->>User: Show session expired error
+    else User not found
+        API-->>-App: 404 — User not found
+        App-->>User: Show account error
+    else Success
+        API-->>-App: 200 — Full profile data
+        App->>App: Populate name, email, phone fields
+        App->>App: Determine auth mode (local vs Google)
+        App-->>User: Display profile: avatar, name, email, phone
+        Note right of App: Password field shows "Set a password" for Google users
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 15 — Update Username
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 15 — Update Username
+
+    User->>App: Tap edit icon next to Name field
+    App-->>User: Show "Change Username" dialog
+    Note right of App: Dialog pre-filled with current username
+
+    User->>App: Enter new username
+    App->>App: Validate: non-empty, different from current
+
+    alt Username is empty
+        App-->>User: Show empty field error
+    else Username unchanged
+        App-->>User: Dismiss dialog — no request sent
+    else Valid new username
+        User->>App: Tap Save
+        App->>Storage: Read auth_token
+        Storage-->>App: JWT token
+
+        App->>+API: PUT /me
+        Note right of App: Header: Authorization Bearer token
+        Note right of App: Body: {username: newUsername}
+
+        API->>DB: Update username for authenticated user
+
+        alt Token invalid or expired
+            DB-->>API: Auth failure
+            API-->>-App: 401 — Session expired
+            App-->>User: Show session expired error
+        else User not found
+            API-->>-App: 404 — User not found
+            App-->>User: Show account error
+        else Username updated successfully
+            DB-->>API: Update confirmed
+            API-->>-App: 200 — Profile updated
+            App->>App: Update userName reactive variable
+            App-->>User: Show success notification
+            App-->>User: Avatar initial and name field refresh instantly
+        end
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 16 — Change Password (Local Account)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+
+    Note over User,DB: Diagram 16 — Change Password (Local Account)
+
+    User->>App: Tap edit icon next to Password field
+    App-->>User: Show "Change Password" dialog
+    Note right of App: Fields: current password, new password, confirm
+
+    User->>App: Fill in all password fields
+    App->>App: Validate: no empty fields, passwords match, min 8 chars
+
+    alt Validation failed
+        App-->>User: Show corresponding validation error
+    else All validations pass
+        User->>App: Tap Save
+        App->>Storage: Read auth_token
+        Storage-->>App: JWT token
+
+        App->>+API: PUT /me/password
+        Note right of App: Header: Authorization Bearer token
+        Note right of App: Body: {old_password, new_password}
+
+        API->>DB: Verify old password hash
+
+        alt Old password incorrect
+            DB-->>API: Hash mismatch
+            API-->>-App: 401 — Wrong current password
+            App-->>User: Show wrong password error
+        else Token expired
+            API-->>-App: 401 — Session expired
+            App-->>User: Show session expired error
+        else User not found
+            API-->>-App: 404 — User not found
+            App-->>User: Show account error
+        else Password updated
+            DB->>DB: Hash and store new password
+            DB-->>API: Password updated
+            API-->>-App: 200 — Password changed successfully
+            App->>Storage: Write has_password = true
+            App-->>User: Show success notification
+        end
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 17 — Change Email Address (2-Step Flow)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+    participant Mail as Email Service
+
+    Note over User,Mail: Diagram 17 — Change Email Address (2-Step Flow)
+
+    Note over User,Mail: Step 1 — Request Email Change
+
+    User->>App: Tap edit icon next to Email field
+    App-->>User: Navigate to Email Change screen
+    User->>App: Enter new email address
+
+    App->>Storage: Read auth_token
+    Storage-->>App: JWT token
+
+    App->>+API: POST /me/email/request
+    Note right of App: Header: Authorization Bearer token
+    Note right of App: Body: {new_email}
+
+    API->>DB: Check if new email is already in use
+
+    alt Email already registered
+        DB-->>API: Email conflict
+        API-->>-App: 409 — Email already used
+        App-->>User: Show email already taken error
+    else Email service failure
+        API-->>-App: 500 — Failed to send verification email
+        App-->>User: Show service error — try again later
+    else Email is available
+        DB-->>API: Email is free
+        API->>Mail: Send 6-digit OTP to new email address
+        Mail-->>User: OTP email delivered to new address
+        API-->>-App: 200 — Verification code sent
+        App-->>User: Show OTP input screen
+
+        Note over User,API: Step 2 — Confirm Email Change
+
+        User->>App: Enter 6-digit OTP code
+        App->>+API: POST /me/email/confirm
+        Note right of App: Header: Authorization Bearer token
+        Note right of App: Body: {code}
+
+        API->>DB: Validate OTP against pending request
+
+        alt No pending request found
+            DB-->>API: No pending change
+            API-->>-App: 400 — No pending email change request
+            App-->>User: Show expired request error
+        else OTP invalid
+            DB-->>API: Code mismatch
+            API-->>-App: 401 — Invalid verification code
+            App-->>User: Show wrong code error
+        else OTP valid
+            DB->>DB: Update user email address
+            DB-->>API: Email updated
+            API-->>-App: 200 — Email changed successfully
+            App-->>User: Show success and navigate back to settings
+        end
+    end
+
+
+%% ============================================================
+%%  DIAGRAM 18 — Add / Change Phone Number (2-Step Flow)
+%% ============================================================
+
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Storage as Secure Storage
+    participant API as API Server
+    participant DB as Database
+    participant SMS as SMS Service
+
+    Note over User,SMS: Diagram 18 — Add / Change Phone Number (2-Step Flow)
+
+    Note over User,SMS: Step 1 — Send Verification Code
+
+    User->>App: Tap Verify or Change on Phone field
+    App-->>User: Navigate to Phone Verification screen
+    User->>App: Enter phone number
+
+    App->>Storage: Read auth_token
+    Storage-->>App: JWT token
+
+    App->>+API: POST /me/phone/send-code
+    Note right of App: Header: Authorization Bearer token
+    Note right of App: Body: {phone}
+
+    API->>DB: Check if phone already linked to another account
+
+    alt Phone already used by another account
+        DB-->>API: Phone conflict
+        API-->>-App: 409 — Phone number already in use
+        App-->>User: Show phone already taken error
+    else User not found
+        API-->>-App: 404 — User not found
+        App-->>User: Show account error
+    else Phone available
+        DB-->>API: Phone is free
+        API->>SMS: Send 6-digit OTP via SMS
+        SMS-->>User: SMS OTP delivered
+        API-->>-App: 200 — SMS code sent
+        App-->>User: Show OTP input screen
+
+        Note over User,API: Step 2 — Verify SMS Code
+
+        User->>App: Enter 6-digit SMS code
+        App->>+API: POST /me/phone/verify-code
+        Note right of App: Header: Authorization Bearer token
+        Note right of App: Body: {phone, code}
+
+        API->>DB: Validate OTP against pending entry
+
+        alt No pending code for this number
+            DB-->>API: No pending verification
+            API-->>-App: 400 — No pending code found
+            App-->>User: Show expired code error — request again
+        else Code belongs to a different user
+            DB-->>API: Code ownership mismatch
+            API-->>-App: 403 — Code belongs to a different user
+            App-->>User: Show ownership error
+        else OTP invalid
+            DB-->>API: Code mismatch
+            API-->>-App: 401 — Invalid SMS code
+            App-->>User: Show wrong code error
+        else OTP valid
+            DB->>DB: Link phone number to user account
+            DB-->>API: Phone verified and saved
+            API-->>-App: 200 — Phone number verified
+            App-->>User: Show success and navigate back to settings
+        end
+    end

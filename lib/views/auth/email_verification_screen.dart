@@ -19,7 +19,7 @@ class EmailVerificationScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textPrimary),
+          icon:  Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textPrimary),
           onPressed: () => Get.back(),
         ),
       ),
@@ -29,7 +29,7 @@ class EmailVerificationScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 20),
+               SizedBox(height: 20),
 
               // ── Icon ───────────────────────────────────────────────────────
               Container(
@@ -39,14 +39,14 @@ class EmailVerificationScreen extends StatelessWidget {
                   color: AppTheme.primary.withOpacity(0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child:  Icon(
                   Icons.mark_email_unread_outlined,
                   size: 56,
                   color: AppTheme.primary,
                 ),
               ),
 
-              const SizedBox(height: 32),
+               SizedBox(height: 32),
 
               // ── Title ──────────────────────────────────────────────────────
               Text(
@@ -57,7 +57,7 @@ class EmailVerificationScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
 
-              const SizedBox(height: 12),
+               SizedBox(height: 12),
 
               // ── Subtitle ───────────────────────────────────────────────────
               Obx(() => Text(
@@ -69,7 +69,7 @@ class EmailVerificationScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   )),
 
-              const SizedBox(height: 40),
+               SizedBox(height: 40),
 
               // ── Code input ─────────────────────────────────────────────────
               Align(
@@ -83,7 +83,7 @@ class EmailVerificationScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 10),
+               SizedBox(height: 10),
 
               Container(
                 decoration: AppTheme.inputDecoration,
@@ -95,13 +95,13 @@ class EmailVerificationScreen extends StatelessWidget {
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9a-zA-Z]')),
                   ],
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 6,
                     color: AppTheme.textPrimary,
                   ),
-                  decoration: const InputDecoration(
+                  decoration:  InputDecoration(
                     hintText: '• • • • • •',
                     hintStyle: TextStyle(
                       fontSize: 22,
@@ -113,33 +113,42 @@ class EmailVerificationScreen extends StatelessWidget {
                       Icons.lock_outline_rounded,
                       color: AppTheme.primary,
                     ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 36),
+               SizedBox(height: 36),
 
               // ── Confirm button ─────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: controller.confirmEmail,
-                    child: const Text(
-                      'Verify Email',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                  child: Obx(() => ElevatedButton(
+                    onPressed: controller.isLoading.value ? null : controller.confirmEmail,
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Verify Email',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                  )),
                 ),
               ),
 
-              const SizedBox(height: 28),
+               SizedBox(height: 28),
 
               // ── Divider ────────────────────────────────────────────────────
               Row(
@@ -156,12 +165,12 @@ class EmailVerificationScreen extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 20),
+               SizedBox(height: 20),
 
               // ── Back to signup ─────────────────────────────────────────────
               TextButton(
                 onPressed: () => Get.back(),
-                child: const Text(
+                child:  Text(
                   'Go back and try again',
                   style: TextStyle(
                     fontSize: 16,
@@ -171,7 +180,7 @@ class EmailVerificationScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 20),
+               SizedBox(height: 20),
             ],
           ),
         ),

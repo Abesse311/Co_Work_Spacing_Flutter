@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_projet_tutore/controllers/auth_controller/SignUp_controller.dart';
+import 'package:flutter_projet_tutore/core/localization/translation_keys.dart';
 import 'package:get/get.dart';
 import 'package:flutter_projet_tutore/core/theme/app_theme.dart';
 
@@ -112,13 +113,22 @@ class RegisterScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: controller.registerEmail_password,
-                        child: Text(
-                          'Sign up',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ),
+                      child: Obx(() => ElevatedButton(
+                        onPressed: controller.isLoading.value ? null : controller.registerEmail_password,
+                        child: controller.isLoading.value
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                TKeys.signUpBtn.tr,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                      )),
                     ),
                   ),
                   
@@ -132,13 +142,13 @@ class RegisterScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                        Text(
-                        'already have an account? ',
+                        TKeys.alreadyHaveAccount.tr,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       GestureDetector(
                         onTap: () => Get.toNamed('/login'),
                         child:  Text(
-                          'Log in',
+                          TKeys.logInBtn.tr,
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold,
                           color: AppTheme.primary,)
                         ),
